@@ -452,7 +452,7 @@ public abstract class ImmutableMultiset<E> extends ImmutableMultisetGwtSerializa
    * Builder} constructor.
    */
   public static <E> Builder<E> builder() {
-    return new Builder<E>();
+    return new Builder<>();
   }
 
   /**
@@ -629,6 +629,15 @@ public abstract class ImmutableMultiset<E> extends ImmutableMultisetGwtSerializa
     @Override
     public int size() {
       return entries.size();
+    }
+
+    // redeclare to help optimizers with b/310253115
+    @SuppressWarnings("RedundantOverride")
+    @Override
+    @J2ktIncompatible // serialization
+    @GwtIncompatible // serialization
+    Object writeReplace() {
+      return super.writeReplace();
     }
   }
 

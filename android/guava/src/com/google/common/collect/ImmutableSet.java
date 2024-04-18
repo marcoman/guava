@@ -38,7 +38,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.SortedSet;
-import java.util.Spliterator;
+import java.util.stream.Collector;
 import javax.annotation.CheckForNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
@@ -52,11 +52,18 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @SuppressWarnings("serial") // we're overriding default serialization
 @ElementTypesAreNonnullByDefault
 public abstract class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
+
+  /**
+   * Returns a {@code Collector} that accumulates the input elements into a new {@code
+   * ImmutableSet}. Elements appear in the resulting set in the encounter order of the stream; if
+   * the stream contains duplicates (according to {@link Object#equals(Object)}), only the first
+   * duplicate in encounter order will appear in the result.
+   */
   @SuppressWarnings({"AndroidJdkLibsChecker", "Java7ApiChecker"})
-  // @IgnoreJRERequirement is not necessary because this compiles down to a constant.
-  // (which is fortunate because Animal Sniffer doesn't look for @IgnoreJRERequirement on fields)
-  static final int SPLITERATOR_CHARACTERISTICS =
-      ImmutableCollection.SPLITERATOR_CHARACTERISTICS | Spliterator.DISTINCT;
+  @IgnoreJRERequirement // Users will use this only if they're already using streams.
+  static <E> Collector<E, ?, ImmutableSet<E>> toImmutableSet() {
+    return CollectCollectors.toImmutableSet();
+  }
 
   /**
    * Returns the empty immutable set. Preferred over {@link Collections#emptySet} for code
@@ -75,7 +82,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E> implements 
    * type conveys the immutability guarantee.
    */
   public static <E> ImmutableSet<E> of(E element) {
-    return new SingletonImmutableSet<E>(element);
+    return new SingletonImmutableSet<>(element);
   }
 
   /**
@@ -252,6 +259,11 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E> implements 
    * @throws NullPointerException if any of {@code elements} is null
    * @since 7.0 (source-compatible since 2.0)
    */
+  // This the best we could do to get copyOfEnumSet to compile in the mainline.
+  // The suppression also covers the cast to E[], discussed below.
+  // In the backport, we don't have those cases and thus don't need this suppression.
+  // We keep it to minimize diffs.
+  @SuppressWarnings("unchecked")
   public static <E> ImmutableSet<E> copyOf(Collection<? extends E> elements) {
     /*
      * TODO(lowasser): consider checking for ImmutableAsList here
@@ -405,7 +417,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E> implements 
    * Builder} constructor.
    */
   public static <E> Builder<E> builder() {
-    return new Builder<E>();
+    return new Builder<>();
   }
 
   /**
@@ -422,7 +434,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E> implements 
    */
   public static <E> Builder<E> builderWithExpectedSize(int expectedSize) {
     checkNonnegative(expectedSize, "expectedSize");
-    return new Builder<E>(expectedSize);
+    return new Builder<>(expectedSize);
   }
 
   /**

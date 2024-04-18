@@ -33,7 +33,11 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.ToIntFunction;
+import java.util.stream.Collector;
 import javax.annotation.CheckForNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A {@link SortedMultiset} whose contents will never change, with many other important properties
@@ -58,6 +62,67 @@ public abstract class ImmutableSortedMultiset<E> extends ImmutableMultiset<E>
   // TODO(lowasser): GWT compatibility
 
   /**
+   * Returns a {@code Collector} that accumulates the input elements into a new {@code
+   * ImmutableMultiset}. Elements are sorted by the specified comparator.
+   *
+   * <p><b>Warning:</b> {@code comparator} should be <i>consistent with {@code equals}</i> as
+   * explained in the {@link Comparator} documentation.
+   */
+  @SuppressWarnings({"AndroidJdkLibsChecker", "Java7ApiChecker"})
+  @IgnoreJRERequirement // Users will use this only if they're already using streams.
+  static <E> Collector<E, ?, ImmutableSortedMultiset<E>> toImmutableSortedMultiset(
+      Comparator<? super E> comparator) {
+    return toImmutableSortedMultiset(comparator, Function.identity(), e -> 1);
+  }
+
+  /**
+   * Returns a {@code Collector} that accumulates elements into an {@code ImmutableSortedMultiset}
+   * whose elements are the result of applying {@code elementFunction} to the inputs, with counts
+   * equal to the result of applying {@code countFunction} to the inputs.
+   *
+   * <p>If the mapped elements contain duplicates (according to {@code comparator}), the first
+   * occurrence in encounter order appears in the resulting multiset, with count equal to the sum of
+   * the outputs of {@code countFunction.applyAsInt(t)} for each {@code t} mapped to that element.
+   */
+  @SuppressWarnings({"AndroidJdkLibsChecker", "Java7ApiChecker"})
+  @IgnoreJRERequirement // Users will use this only if they're already using streams.
+  static <T extends @Nullable Object, E>
+      Collector<T, ?, ImmutableSortedMultiset<E>> toImmutableSortedMultiset(
+          Comparator<? super E> comparator,
+          Function<? super T, ? extends E> elementFunction,
+          ToIntFunction<? super T> countFunction) {
+    checkNotNull(comparator);
+    checkNotNull(elementFunction);
+    checkNotNull(countFunction);
+    return Collector.of(
+        () -> TreeMultiset.create(comparator),
+        (multiset, t) -> mapAndAdd(t, multiset, elementFunction, countFunction),
+        (multiset1, multiset2) -> {
+          multiset1.addAll(multiset2);
+          return multiset1;
+        },
+        (Multiset<E> multiset) -> copyOfSortedEntries(comparator, multiset.entrySet()));
+  }
+
+  @SuppressWarnings({"AndroidJdkLibsChecker", "Java7ApiChecker"})
+  @IgnoreJRERequirement // helper for toImmutableSortedMultiset
+  /*
+   * If we make these calls inline inside toImmutableSortedMultiset, we get an Animal Sniffer error,
+   * despite the @IgnoreJRERequirement annotation there. My assumption is that, because javac
+   * generates a synthetic method for the body of the lambda, the actual method calls that Animal
+   * Sniffer is flagging don't appear inside toImmutableSortedMultiset but rather inside that
+   * synthetic method. By moving those calls to a named method, we're able to apply
+   * @IgnoreJRERequirement somewhere that it will help.
+   */
+  private static <T extends @Nullable Object, E> void mapAndAdd(
+      T t,
+      Multiset<E> multiset,
+      Function<? super T, ? extends E> elementFunction,
+      ToIntFunction<? super T> countFunction) {
+    multiset.add(checkNotNull(elementFunction.apply(t)), countFunction.applyAsInt(t));
+  }
+
+  /**
    * Returns the empty immutable sorted multiset.
    *
    * <p><b>Performance note:</b> the instance returned is a singleton.
@@ -72,7 +137,7 @@ public abstract class ImmutableSortedMultiset<E> extends ImmutableMultiset<E>
     RegularImmutableSortedSet<E> elementSet =
         (RegularImmutableSortedSet<E>) ImmutableSortedSet.of(element);
     long[] cumulativeCounts = {0, 1};
-    return new RegularImmutableSortedMultiset<E>(elementSet, cumulativeCounts, 0, 1);
+    return new RegularImmutableSortedMultiset<>(elementSet, cumulativeCounts, 0, 1);
   }
 
   /**
@@ -167,7 +232,7 @@ public abstract class ImmutableSortedMultiset<E> extends ImmutableMultiset<E>
     // Hack around E not being a subtype of Comparable.
     // Unsafe, see ImmutableSortedMultisetFauxverideShim.
     @SuppressWarnings("unchecked")
-    Ordering<E> naturalOrder = (Ordering<E>) Ordering.<Comparable>natural();
+    Ordering<E> naturalOrder = (Ordering<E>) Ordering.<Comparable<?>>natural();
     return copyOf(naturalOrder, elements);
   }
 
@@ -185,7 +250,7 @@ public abstract class ImmutableSortedMultiset<E> extends ImmutableMultiset<E>
     // Hack around E not being a subtype of Comparable.
     // Unsafe, see ImmutableSortedMultisetFauxverideShim.
     @SuppressWarnings("unchecked")
-    Ordering<E> naturalOrder = (Ordering<E>) Ordering.<Comparable>natural();
+    Ordering<E> naturalOrder = (Ordering<E>) Ordering.<Comparable<?>>natural();
     return copyOf(naturalOrder, elements);
   }
 
@@ -211,7 +276,6 @@ public abstract class ImmutableSortedMultiset<E> extends ImmutableMultiset<E>
    *
    * @throws NullPointerException if {@code comparator} or any of {@code elements} is null
    */
-  @SuppressWarnings("unchecked")
   public static <E> ImmutableSortedMultiset<E> copyOf(
       Comparator<? super E> comparator, Iterable<? extends E> elements) {
     if (elements instanceof ImmutableSortedMultiset) {
@@ -252,7 +316,7 @@ public abstract class ImmutableSortedMultiset<E> extends ImmutableMultiset<E>
     if (entries.isEmpty()) {
       return emptyMultiset(comparator);
     }
-    ImmutableList.Builder<E> elementsBuilder = new ImmutableList.Builder<E>(entries.size());
+    ImmutableList.Builder<E> elementsBuilder = new ImmutableList.Builder<>(entries.size());
     long[] cumulativeCounts = new long[entries.size() + 1];
     int i = 0;
     for (Entry<E> entry : entries) {
@@ -260,7 +324,7 @@ public abstract class ImmutableSortedMultiset<E> extends ImmutableMultiset<E>
       cumulativeCounts[i + 1] = cumulativeCounts[i] + entry.getCount();
       i++;
     }
-    return new RegularImmutableSortedMultiset<E>(
+    return new RegularImmutableSortedMultiset<>(
         new RegularImmutableSortedSet<E>(elementsBuilder.build(), comparator),
         cumulativeCounts,
         0,
@@ -272,7 +336,7 @@ public abstract class ImmutableSortedMultiset<E> extends ImmutableMultiset<E>
     if (Ordering.natural().equals(comparator)) {
       return (ImmutableSortedMultiset<E>) RegularImmutableSortedMultiset.NATURAL_EMPTY_MULTISET;
     } else {
-      return new RegularImmutableSortedMultiset<E>(comparator);
+      return new RegularImmutableSortedMultiset<>(comparator);
     }
   }
 
@@ -360,7 +424,7 @@ public abstract class ImmutableSortedMultiset<E> extends ImmutableMultiset<E>
    * @throws NullPointerException if {@code comparator} is null
    */
   public static <E> Builder<E> orderedBy(Comparator<E> comparator) {
-    return new Builder<E>(comparator);
+    return new Builder<>(comparator);
   }
 
   /**
@@ -372,7 +436,7 @@ public abstract class ImmutableSortedMultiset<E> extends ImmutableMultiset<E>
    * href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6468354">bug 6468354</a>.
    */
   public static <E extends Comparable<?>> Builder<E> reverseOrder() {
-    return new Builder<E>(Ordering.<E>natural().reverse());
+    return new Builder<>(Ordering.<E>natural().reverse());
   }
 
   /**
@@ -386,7 +450,7 @@ public abstract class ImmutableSortedMultiset<E> extends ImmutableMultiset<E>
    * href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6468354">bug 6468354</a>.
    */
   public static <E extends Comparable<?>> Builder<E> naturalOrder() {
-    return new Builder<E>(Ordering.natural());
+    return new Builder<>(Ordering.natural());
   }
 
   /**
@@ -680,6 +744,39 @@ public abstract class ImmutableSortedMultiset<E> extends ImmutableMultiset<E>
   @J2ktIncompatible // java.io.ObjectInputStream
   private void readObject(ObjectInputStream stream) throws InvalidObjectException {
     throw new InvalidObjectException("Use SerializedForm");
+  }
+
+  /**
+   * Not supported. Use {@link #toImmutableSortedMultiset} instead. This method exists only to hide
+   * {@link ImmutableMultiset#toImmutableMultiset} from consumers of {@code
+   * ImmutableSortedMultiset}.
+   *
+   * @throws UnsupportedOperationException always
+   * @deprecated Use {@link ImmutableSortedMultiset#toImmutableSortedMultiset}.
+   */
+  @DoNotCall("Use toImmutableSortedMultiset.")
+  @Deprecated
+  @SuppressWarnings({"AndroidJdkLibsChecker", "Java7ApiChecker"})
+  @IgnoreJRERequirement // Users will use this only if they're already using streams.
+  static <E> Collector<E, ?, ImmutableMultiset<E>> toImmutableMultiset() {
+    throw new UnsupportedOperationException();
+  }
+
+  /**
+   * Not supported. Use {@link #toImmutableSortedMultiset} instead. This method exists only to hide
+   * {@link ImmutableMultiset#toImmutableMultiset} from consumers of {@code
+   * ImmutableSortedMultiset}.
+   *
+   * @throws UnsupportedOperationException always
+   * @deprecated Use {@link ImmutableSortedMultiset#toImmutableSortedMultiset}.
+   */
+  @DoNotCall("Use toImmutableSortedMultiset.")
+  @Deprecated
+  @SuppressWarnings({"AndroidJdkLibsChecker", "Java7ApiChecker"})
+  @IgnoreJRERequirement // Users will use this only if they're already using streams.
+  static <T extends @Nullable Object, E> Collector<T, ?, ImmutableMultiset<E>> toImmutableMultiset(
+      Function<? super T, ? extends E> elementFunction, ToIntFunction<? super T> countFunction) {
+    throw new UnsupportedOperationException();
   }
 
   /**

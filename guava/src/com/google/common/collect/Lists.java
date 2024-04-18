@@ -101,6 +101,7 @@ public final class Lists {
    */
   @SafeVarargs
   @GwtCompatible(serializable = true)
+  @SuppressWarnings("nullness") // TODO: b/316358623 - Remove after checker fix.
   public static <E extends @Nullable Object> ArrayList<E> newArrayList(E... elements) {
     checkNotNull(elements); // for GWT
     // Avoid integer overflow when a large array is passed in
@@ -524,7 +525,7 @@ public final class Lists {
    * serialize the copy. Other methods similar to this do not implement serialization at all for
    * this reason.
    *
-   * <p><b>Java 8 users:</b> many use cases for this method are better addressed by {@link
+   * <p><b>Java 8+ users:</b> many use cases for this method are better addressed by {@link
    * java.util.stream.Stream#map}. This method is not being deprecated, but we gently encourage you
    * to migrate to streams.
    */
@@ -563,6 +564,11 @@ public final class Lists {
     @Override
     public int size() {
       return fromList.size();
+    }
+
+    @Override
+    public boolean isEmpty() {
+      return fromList.isEmpty();
     }
 
     @Override
@@ -632,8 +638,6 @@ public final class Lists {
         }
       };
     }
-
-    // TODO: cpovirk - Why override `isEmpty` here but not in TransformingSequentialList?
 
     @Override
     public boolean isEmpty() {
@@ -779,6 +783,15 @@ public final class Lists {
     @Override
     public int size() {
       return string.length();
+    }
+
+    // redeclare to help optimizers with b/310253115
+    @SuppressWarnings("RedundantOverride")
+    @Override
+    @J2ktIncompatible // serialization
+    @GwtIncompatible // serialization
+    Object writeReplace() {
+      return super.writeReplace();
     }
   }
 
