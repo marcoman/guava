@@ -186,7 +186,7 @@ public final class ArbitraryInstances {
    * in Android) requires a successful match in order to generate a {@code MatchResult}:
    * http://goo.gl/5VQFmC
    */
-  private static MatchResult newMatchResult() {
+  private static MatchResult createMatchResult() {
     Matcher matcher = Pattern.compile(".").matcher("X");
     matcher.find();
     return matcher.toMatchResult();
@@ -204,7 +204,7 @@ public final class ArbitraryInstances {
           .put(CharSequence.class, "")
           .put(String.class, "")
           .put(Pattern.class, Pattern.compile(""))
-          .put(MatchResult.class, newMatchResult())
+          .put(MatchResult.class, createMatchResult())
           .put(TimeUnit.class, TimeUnit.SECONDS)
           .put(Charset.class, Charsets.UTF_8)
           .put(Currency.class, Currency.getInstance(Locale.US))
@@ -372,14 +372,7 @@ public final class ArbitraryInstances {
     constructor.setAccessible(true); // accessibility check is too slow
     try {
       return constructor.newInstance();
-      /*
-       * Do not merge the 2 catch blocks below. javac would infer a type of
-       * ReflectiveOperationException, which Animal Sniffer would reject. (Old versions of
-       * Android don't *seem* to mind, but there might be edge cases of which we're unaware.)
-       */
-    } catch (InstantiationException impossible) {
-      throw new AssertionError(impossible);
-    } catch (IllegalAccessException impossible) {
+    } catch (InstantiationException | IllegalAccessException impossible) {
       throw new AssertionError(impossible);
     } catch (InvocationTargetException e) {
       logger.log(Level.WARNING, "Exception while invoking default constructor.", e.getCause());

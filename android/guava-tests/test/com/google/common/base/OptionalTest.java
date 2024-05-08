@@ -40,6 +40,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @ElementTypesAreNonnullByDefault
 @GwtCompatible(emulated = true)
 public final class OptionalTest extends TestCase {
+
   public void testAbsent() {
     Optional<String> optionalName = Optional.absent();
     assertFalse(optionalName.isPresent());
@@ -108,7 +109,7 @@ public final class OptionalTest extends TestCase {
   }
 
   public void testOr_nullSupplier_absent() {
-    Supplier<Object> nullSupplier = Suppliers.ofInstance(null);
+    Supplier<Object> nullSupplier = (Supplier<Object>) Suppliers.<@Nullable Object>ofInstance(null);
     Optional<Object> absentOptional = Optional.absent();
     try {
       absentOptional.or(nullSupplier);
@@ -119,7 +120,7 @@ public final class OptionalTest extends TestCase {
 
   @SuppressWarnings("OptionalOfRedundantMethod") // Unit tests for Optional
   public void testOr_nullSupplier_present() {
-    Supplier<String> nullSupplier = Suppliers.ofInstance(null);
+    Supplier<String> nullSupplier = (Supplier<String>) Suppliers.<@Nullable String>ofInstance(null);
     assertEquals("a", Optional.of("a").or(nullSupplier));
   }
 
@@ -215,8 +216,8 @@ public final class OptionalTest extends TestCase {
   public void testEqualsAndHashCode() {
     new EqualsTester()
         .addEqualityGroup(Optional.absent(), reserialize(Optional.absent()))
-        .addEqualityGroup(Optional.of(new Long(5)), reserialize(Optional.of(new Long(5))))
-        .addEqualityGroup(Optional.of(new Long(42)), reserialize(Optional.of(new Long(42))))
+        .addEqualityGroup(Optional.of(Long.valueOf(5)), reserialize(Optional.of(Long.valueOf(5))))
+        .addEqualityGroup(Optional.of(Long.valueOf(42)), reserialize(Optional.of(Long.valueOf(42))))
         .testEquals();
   }
 

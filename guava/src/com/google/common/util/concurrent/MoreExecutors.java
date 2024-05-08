@@ -671,7 +671,7 @@ public final class MoreExecutors {
         Callable<V> callable, long delay, TimeUnit unit) {
       TrustedListenableFutureTask<V> task = TrustedListenableFutureTask.create(callable);
       ScheduledFuture<?> scheduled = delegate.schedule(task, delay, unit);
-      return new ListenableScheduledTask<V>(task, scheduled);
+      return new ListenableScheduledTask<>(task, scheduled);
     }
 
     @Override
@@ -739,7 +739,8 @@ public final class MoreExecutors {
       public void run() {
         try {
           delegate.run();
-        } catch (RuntimeException | Error t) {
+        } catch (Throwable t) {
+          // Any Exception is either a RuntimeException or sneaky checked exception.
           setException(t);
           throw t;
         }
@@ -784,7 +785,10 @@ public final class MoreExecutors {
    * An implementation of {@link ExecutorService#invokeAny} for {@link ListeningExecutorService}
    * implementations.
    */
-  @SuppressWarnings("GoodTime") // should accept a java.time.Duration
+  @SuppressWarnings({
+    "GoodTime", // should accept a java.time.Duration
+    "CatchingUnchecked", // sneaky checked exception
+  })
   @J2ktIncompatible
   @GwtIncompatible
   @ParametricNullness
@@ -847,7 +851,9 @@ public final class MoreExecutors {
             return f.get();
           } catch (ExecutionException eex) {
             ee = eex;
-          } catch (RuntimeException rex) {
+          } catch (InterruptedException iex) {
+            throw iex;
+          } catch (Exception rex) { // sneaky checked exception
             ee = new ExecutionException(rex);
           }
         }
@@ -906,16 +912,7 @@ public final class MoreExecutors {
           Class.forName("com.google.appengine.api.ThreadManager")
               .getMethod("currentRequestThreadFactory")
               .invoke(null);
-      /*
-       * Do not merge the 3 catch blocks below. javac would infer a type of
-       * ReflectiveOperationException, which Animal Sniffer would reject. (Old versions of Android
-       * don't *seem* to mind, but there might be edge cases of which we're unaware.)
-       */
-    } catch (IllegalAccessException e) {
-      throw new RuntimeException("Couldn't invoke ThreadManager.currentRequestThreadFactory", e);
-    } catch (ClassNotFoundException e) {
-      throw new RuntimeException("Couldn't invoke ThreadManager.currentRequestThreadFactory", e);
-    } catch (NoSuchMethodException e) {
+    } catch (IllegalAccessException | ClassNotFoundException | NoSuchMethodException e) {
       throw new RuntimeException("Couldn't invoke ThreadManager.currentRequestThreadFactory", e);
     } catch (InvocationTargetException e) {
       throw Throwables.propagate(e.getCause());

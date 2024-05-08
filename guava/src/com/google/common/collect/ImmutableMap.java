@@ -23,6 +23,7 @@ import static com.google.common.collect.CollectPreconditions.checkNonnegative;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.GwtCompatible;
+import com.google.common.annotations.GwtIncompatible;
 import com.google.common.annotations.J2ktIncompatible;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
@@ -561,8 +562,11 @@ public abstract class ImmutableMap<K, V> implements Map<K, V>, Serializable {
         if (!throwIfDuplicateKeys) {
           // We want to retain only the last-put value for any given key, before sorting.
           // This could be improved, but orderEntriesByValue is rather rarely used anyway.
-          nonNullEntries = lastEntryForEachKey(nonNullEntries, size);
-          localSize = nonNullEntries.length;
+          Entry<K, V>[] lastEntryForEachKey = lastEntryForEachKey(nonNullEntries, size);
+          if (lastEntryForEachKey != null) {
+            nonNullEntries = lastEntryForEachKey;
+            localSize = lastEntryForEachKey.length;
+          }
         }
         Arrays.sort(
             nonNullEntries,
@@ -639,6 +643,13 @@ public abstract class ImmutableMap<K, V> implements Map<K, V>, Serializable {
       }
     }
 
+    /**
+     * Scans the first {@code size} elements of {@code entries} looking for duplicate keys. If
+     * duplicates are found, a new correctly-sized array is returned with the same elements (up to
+     * {@code size}), except containing only the last occurrence of each duplicate key. Otherwise
+     * {@code null} is returned.
+     */
+    @CheckForNull
     private static <K, V> Entry<K, V>[] lastEntryForEachKey(Entry<K, V>[] entries, int size) {
       Set<K> seen = new HashSet<>();
       BitSet dups = new BitSet(); // slots that are overridden by a later duplicate key
@@ -648,7 +659,7 @@ public abstract class ImmutableMap<K, V> implements Map<K, V>, Serializable {
         }
       }
       if (dups.isEmpty()) {
-        return entries;
+        return null;
       }
       @SuppressWarnings({"rawtypes", "unchecked"})
       Entry<K, V>[] newEntries = new Entry[size - dups.cardinality()];
@@ -721,6 +732,7 @@ public abstract class ImmutableMap<K, V> implements Map<K, V>, Serializable {
 
   private static <K extends Enum<K>, V> ImmutableMap<K, ? extends V> copyOfEnumMap(
       EnumMap<?, ? extends V> original) {
+    @SuppressWarnings("unchecked") // the best we could do to make copyOf(Map) compile
     EnumMap<K, V> copy = new EnumMap<>((EnumMap<K, ? extends V>) original);
     for (Entry<K, V> entry : copy.entrySet()) {
       checkEntryNotNull(entry.getKey(), entry.getValue());
@@ -757,6 +769,15 @@ public abstract class ImmutableMap<K, V> implements Map<K, V>, Serializable {
         public UnmodifiableIterator<Entry<K, V>> iterator() {
           return entryIterator();
         }
+
+        // redeclare to help optimizers with b/310253115
+        @SuppressWarnings("RedundantOverride")
+        @Override
+        @J2ktIncompatible // serialization
+        @GwtIncompatible // serialization
+        Object writeReplace() {
+          return super.writeReplace();
+        }
       }
       return new EntrySetImpl();
     }
@@ -764,6 +785,15 @@ public abstract class ImmutableMap<K, V> implements Map<K, V>, Serializable {
     @Override
     ImmutableCollection<V> createValues() {
       return new ImmutableMapValues<>(this);
+    }
+
+    // redeclare to help optimizers with b/310253115
+    @SuppressWarnings("RedundantOverride")
+    @Override
+    @J2ktIncompatible // serialization
+    @GwtIncompatible // serialization
+    Object writeReplace() {
+      return super.writeReplace();
     }
   }
 
@@ -973,7 +1003,8 @@ public abstract class ImmutableMap<K, V> implements Map<K, V>, Serializable {
   /**
    * @since 21.0 (but only since 23.5 in the Android <a
    *     href="https://github.com/google/guava#guava-google-core-libraries-for-java">flavor</a>).
-   *     Note, however, that Java 8 users can call this method with any version and flavor of Guava.
+   *     Note, however, that Java 8+ users can call this method with any version and flavor of
+   *     Guava.
    */
   @Override
   @CheckForNull
@@ -1169,6 +1200,15 @@ public abstract class ImmutableMap<K, V> implements Map<K, V>, Serializable {
           };
         }
       };
+    }
+
+    // redeclare to help optimizers with b/310253115
+    @SuppressWarnings("RedundantOverride")
+    @Override
+    @J2ktIncompatible // serialization
+    @GwtIncompatible // serialization
+    Object writeReplace() {
+      return super.writeReplace();
     }
   }
 

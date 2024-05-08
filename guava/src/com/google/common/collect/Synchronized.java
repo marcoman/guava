@@ -49,6 +49,7 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 import javax.annotation.CheckForNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
@@ -119,7 +120,7 @@ final class Synchronized {
 
   private static <E extends @Nullable Object> Collection<E> collection(
       Collection<E> collection, @CheckForNull Object mutex) {
-    return new SynchronizedCollection<E>(collection, mutex);
+    return new SynchronizedCollection<>(collection, mutex);
   }
 
   @VisibleForTesting
@@ -265,7 +266,7 @@ final class Synchronized {
 
   @VisibleForTesting
   static <E extends @Nullable Object> Set<E> set(Set<E> set, @CheckForNull Object mutex) {
-    return new SynchronizedSet<E>(set, mutex);
+    return new SynchronizedSet<>(set, mutex);
   }
 
   static class SynchronizedSet<E extends @Nullable Object> extends SynchronizedCollection<E>
@@ -302,7 +303,7 @@ final class Synchronized {
 
   private static <E extends @Nullable Object> SortedSet<E> sortedSet(
       SortedSet<E> set, @CheckForNull Object mutex) {
-    return new SynchronizedSortedSet<E>(set, mutex);
+    return new SynchronizedSortedSet<>(set, mutex);
   }
 
   static class SynchronizedSortedSet<E extends @Nullable Object> extends SynchronizedSet<E>
@@ -494,7 +495,7 @@ final class Synchronized {
     if (multiset instanceof SynchronizedMultiset || multiset instanceof ImmutableMultiset) {
       return multiset;
     }
-    return new SynchronizedMultiset<E>(multiset, mutex);
+    return new SynchronizedMultiset<>(multiset, mutex);
   }
 
   static final class SynchronizedMultiset<E extends @Nullable Object>
@@ -1187,15 +1188,11 @@ final class Synchronized {
       }
     }
 
-    /*
-     * TODO(cpovirk): Uncomment the @NonNull annotations below once our JDK stubs and J2KT
-     * emulations include them.
-     */
     @Override
     @CheckForNull
+    @SuppressWarnings("nullness") // TODO(b/262880368): Remove once we see @NonNull in JDK APIs
     public V computeIfPresent(
-        K key,
-        BiFunction<? super K, ? super /*@NonNull*/ V, ? extends @Nullable V> remappingFunction) {
+        K key, BiFunction<? super K, ? super @NonNull V, ? extends @Nullable V> remappingFunction) {
       synchronized (mutex) {
         return delegate().computeIfPresent(key, remappingFunction);
       }
@@ -1213,10 +1210,11 @@ final class Synchronized {
 
     @Override
     @CheckForNull
+    @SuppressWarnings("nullness") // TODO(b/262880368): Remove once we see @NonNull in JDK APIs
     public V merge(
         K key,
-        /*@NonNull*/ V value,
-        BiFunction<? super /*@NonNull*/ V, ? super /*@NonNull*/ V, ? extends @Nullable V>
+        @NonNull V value,
+        BiFunction<? super @NonNull V, ? super @NonNull V, ? extends @Nullable V>
             remappingFunction) {
       synchronized (mutex) {
         return delegate().merge(key, value, remappingFunction);
@@ -1598,7 +1596,7 @@ final class Synchronized {
   @GwtIncompatible // NavigableSet
   static <E extends @Nullable Object> NavigableSet<E> navigableSet(
       NavigableSet<E> navigableSet, @CheckForNull Object mutex) {
-    return new SynchronizedNavigableSet<E>(navigableSet, mutex);
+    return new SynchronizedNavigableSet<>(navigableSet, mutex);
   }
 
   @GwtIncompatible // NavigableSet
@@ -1930,7 +1928,7 @@ final class Synchronized {
   }
 
   static <E extends @Nullable Object> Deque<E> deque(Deque<E> deque, @CheckForNull Object mutex) {
-    return new SynchronizedDeque<E>(deque, mutex);
+    return new SynchronizedDeque<>(deque, mutex);
   }
 
   static final class SynchronizedDeque<E extends @Nullable Object> extends SynchronizedQueue<E>

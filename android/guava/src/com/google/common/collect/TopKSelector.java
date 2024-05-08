@@ -76,7 +76,7 @@ final class TopKSelector<
    */
   public static <T extends @Nullable Object> TopKSelector<T> least(
       int k, Comparator<? super T> comparator) {
-    return new TopKSelector<T>(comparator, k);
+    return new TopKSelector<>(comparator, k);
   }
 
   /**
@@ -98,7 +98,7 @@ final class TopKSelector<
    */
   public static <T extends @Nullable Object> TopKSelector<T> greatest(
       int k, Comparator<? super T> comparator) {
-    return new TopKSelector<T>(Ordering.from(comparator).reverse(), k);
+    return new TopKSelector<>(Ordering.from(comparator).reverse(), k);
   }
 
   private final int k;
@@ -118,6 +118,7 @@ final class TopKSelector<
    */
   @CheckForNull private T threshold;
 
+  @SuppressWarnings("unchecked") // TODO(cpovirk): Consider storing Object[] instead of T[].
   private TopKSelector(Comparator<? super T> comparator, int k) {
     this.comparator = checkNotNull(comparator, "comparator");
     this.k = k;
@@ -159,6 +160,7 @@ final class TopKSelector<
    * Quickselects the top k elements from the 2k elements in the buffer. O(k) expected time, O(k log
    * k) worst case.
    */
+  @SuppressWarnings("nullness") // TODO: b/316358623 - Remove after checker fix.
   private void trim() {
     int left = 0;
     int right = 2 * k - 1;
@@ -271,6 +273,7 @@ final class TopKSelector<
    * <p>The returned list is an unmodifiable copy and will not be affected by further changes to
    * this {@code TopKSelector}. This method returns in O(k log k) time.
    */
+  @SuppressWarnings("nullness") // TODO: b/316358623 - Remove after checker fix.
   public List<T> topK() {
     @SuppressWarnings("nullness") // safe because we pass sort() a range that contains real Ts
     T[] castBuffer = (T[]) buffer;

@@ -21,6 +21,7 @@ import static com.google.common.collect.CollectPreconditions.checkNonnegative;
 import static com.google.common.collect.ObjectArrays.checkElementsNotNull;
 
 import com.google.common.annotations.GwtCompatible;
+import com.google.common.annotations.GwtIncompatible;
 import com.google.common.annotations.J2ktIncompatible;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.errorprone.annotations.DoNotCall;
@@ -357,7 +358,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E> imple
    * @since 2.0
    */
   public ImmutableList<E> asList() {
-    return isEmpty() ? ImmutableList.<E>of() : ImmutableList.<E>asImmutableList(toArray());
+    return isEmpty() ? ImmutableList.of() : ImmutableList.asImmutableList(toArray());
   }
 
   /**
@@ -381,6 +382,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E> imple
   }
 
   @J2ktIncompatible // serialization
+  @GwtIncompatible // serialization
   Object writeReplace() {
     // We serialize by default to ImmutableList, the simplest thing that works.
     return new ImmutableList.SerializedForm(toArray());
