@@ -25,6 +25,7 @@ import static com.google.common.collect.CollectPreconditions.checkNonnegative;
 import static com.google.common.collect.ObjectArrays.checkElementsNotNull;
 import static com.google.common.collect.RegularImmutableList.EMPTY;
 
+import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
 import com.google.common.annotations.J2ktIncompatible;
@@ -66,10 +67,13 @@ public abstract class ImmutableList<E> extends ImmutableCollection<E>
   /**
    * Returns a {@code Collector} that accumulates the input elements into a new {@code
    * ImmutableList}, in encounter order.
+   *
+   * @since 33.2.0 (available since 21.0 in guava-jre)
    */
   @SuppressWarnings({"AndroidJdkLibsChecker", "Java7ApiChecker"})
   @IgnoreJRERequirement // Users will use this only if they're already using streams.
-  static <E> Collector<E, ?, ImmutableList<E>> toImmutableList() {
+  @Beta // TODO: b/288085449 - Remove.
+  public static <E> Collector<E, ?, ImmutableList<E>> toImmutableList() {
     return CollectCollectors.toImmutableList();
   }
 
@@ -91,10 +95,10 @@ public abstract class ImmutableList<E> extends ImmutableCollection<E>
    * comparably to {@link Collections#singletonList}, but will not accept a null element. It is
    * preferable mainly for consistency and maintainability of your code.
    *
-   * @throws NullPointerException if {@code element} is null
+   * @throws NullPointerException if the element is null
    */
-  public static <E> ImmutableList<E> of(E element) {
-    return construct(element);
+  public static <E> ImmutableList<E> of(E e1) {
+    return construct(e1);
   }
 
   /**

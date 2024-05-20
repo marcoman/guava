@@ -22,6 +22,7 @@ import static com.google.common.collect.CollectPreconditions.checkNonnegative;
 import static com.google.common.collect.ObjectArrays.checkElementNotNull;
 import static java.util.Objects.requireNonNull;
 
+import com.google.common.annotations.Beta;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.J2ktIncompatible;
 import com.google.common.annotations.VisibleForTesting;
@@ -58,10 +59,13 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E> implements 
    * ImmutableSet}. Elements appear in the resulting set in the encounter order of the stream; if
    * the stream contains duplicates (according to {@link Object#equals(Object)}), only the first
    * duplicate in encounter order will appear in the result.
+   *
+   * @since 33.2.0 (available since 21.0 in guava-jre)
    */
   @SuppressWarnings({"AndroidJdkLibsChecker", "Java7ApiChecker"})
   @IgnoreJRERequirement // Users will use this only if they're already using streams.
-  static <E> Collector<E, ?, ImmutableSet<E>> toImmutableSet() {
+  @Beta // TODO: b/288085449 - Remove.
+  public static <E> Collector<E, ?, ImmutableSet<E>> toImmutableSet() {
     return CollectCollectors.toImmutableSet();
   }
 
@@ -77,12 +81,12 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E> implements 
   }
 
   /**
-   * Returns an immutable set containing {@code element}. Preferred over {@link
+   * Returns an immutable set containing the given element. Preferred over {@link
    * Collections#singleton} for code consistency, {@code null} rejection, and because the return
    * type conveys the immutability guarantee.
    */
-  public static <E> ImmutableSet<E> of(E element) {
-    return new SingletonImmutableSet<>(element);
+  public static <E> ImmutableSet<E> of(E e1) {
+    return new SingletonImmutableSet<>(e1);
   }
 
   /**
