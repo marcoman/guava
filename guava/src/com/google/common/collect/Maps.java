@@ -1246,6 +1246,18 @@ public final class Maps {
    * <p>If {@code keys} is a {@link Set}, a live view can be obtained instead of a copy using {@link
    * Maps#asMap(Set, Function)}.
    *
+   * <p><b>Note:</b> on Java 8+, it is usually better to use streams. For example:
+   *
+   * <pre>{@code
+   * import static com.google.common.collect.ImmutableMap.toImmutableMap;
+   * ...
+   * ImmutableMap<Color, String> colorNames =
+   *     allColors.stream().collect(toImmutableMap(c -> c, c -> c.toString()));
+   * }</pre>
+   *
+   * <p>Streams provide a more standard and flexible API and the lambdas make it clear what the keys
+   * and values in the map are.
+   *
    * @throws NullPointerException if any element of {@code keys} is {@code null}, or if {@code
    *     valueFunction} produces {@code null} for any key
    * @since 14.0
@@ -1654,6 +1666,7 @@ public final class Maps {
    * @param bimap the bimap to be wrapped in a synchronized view
    * @return a synchronized view of the specified bimap
    */
+  @J2ktIncompatible // Synchronized
   public static <K extends @Nullable Object, V extends @Nullable Object>
       BiMap<K, V> synchronizedBiMap(BiMap<K, V> bimap) {
     return Synchronized.biMap(bimap, null);
@@ -3799,6 +3812,7 @@ public final class Maps {
    * @since 13.0
    */
   @GwtIncompatible // NavigableMap
+  @J2ktIncompatible // Synchronized
   public static <K extends @Nullable Object, V extends @Nullable Object>
       NavigableMap<K, V> synchronizedNavigableMap(NavigableMap<K, V> navigableMap) {
     return Synchronized.navigableMap(navigableMap);
