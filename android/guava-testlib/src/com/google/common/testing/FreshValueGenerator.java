@@ -18,12 +18,12 @@ package com.google.common.testing;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.throwIfUnchecked;
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.GwtIncompatible;
 import com.google.common.annotations.J2ktIncompatible;
 import com.google.common.base.CharMatcher;
-import com.google.common.base.Charsets;
 import com.google.common.base.Equivalence;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
@@ -505,7 +505,7 @@ class FreshValueGenerator {
 
   @Generates
   Charset generateCharset() {
-    return pickInstance(Charset.availableCharsets().values(), Charsets.UTF_8);
+    return pickInstance(Charset.availableCharsets().values(), UTF_8);
   }
 
   @Generates
@@ -605,6 +605,7 @@ class FreshValueGenerator {
   <T extends @Nullable Object> Ordering<T> generateOrdering() {
     return new Ordering<T>() {
       @Override
+      @SuppressWarnings("UnusedVariable") // intentionally weird Comparator
       public int compare(T left, T right) {
         return 0;
       }

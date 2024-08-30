@@ -47,6 +47,7 @@ import org.junit.Ignore;
  */
 @GwtCompatible(emulated = true)
 @Ignore // Affects only Android test runner, which respects JUnit 4 annotations on JUnit 3 tests.
+@SuppressWarnings("JUnit4ClassUsedInJUnit3")
 public class CollectionAddAllTester<E extends @Nullable Object>
     extends AbstractCollectionTester<E> {
   @CollectionFeature.Require(SUPPORTS_ADD)
@@ -178,8 +179,9 @@ public class CollectionAddAllTester<E extends @Nullable Object>
   /**
    * Returns the {@link Method} instance for {@link #testAddAll_unsupportedNonePresent()} so that
    * tests can suppress it with {@code FeatureSpecificTestSuiteBuilder.suppressing()} while we
-   * figure out what to do with <a href="http://goo.gl/qJBruX">{@code ConcurrentHashMap} support for
-   * {@code entrySet().add()}</a>.
+   * figure out what to do with <a
+   * href="https://github.com/openjdk/jdk/blob/c25c4896ad9ef031e3cddec493aef66ff87c48a7/src/java.base/share/classes/java/util/concurrent/ConcurrentHashMap.java#L4830">{@code
+   * ConcurrentHashMap} support for {@code entrySet().add()}</a>.
    */
   @J2ktIncompatible
   @GwtIncompatible // reflection
@@ -190,8 +192,9 @@ public class CollectionAddAllTester<E extends @Nullable Object>
   /**
    * Returns the {@link Method} instance for {@link #testAddAll_unsupportedSomePresent()} so that
    * tests can suppress it with {@code FeatureSpecificTestSuiteBuilder.suppressing()} while we
-   * figure out what to do with <a href="http://goo.gl/qJBruX">{@code ConcurrentHashMap} support for
-   * {@code entrySet().add()}</a>.
+   * figure out what to do with <a
+   * href="https://github.com/openjdk/jdk/blob/c25c4896ad9ef031e3cddec493aef66ff87c48a7/src/java.base/share/classes/java/util/concurrent/ConcurrentHashMap.java#L4830">{@code
+   * ConcurrentHashMap} support for {@code entrySet().add()}</a>.
    */
   @J2ktIncompatible
   @GwtIncompatible // reflection

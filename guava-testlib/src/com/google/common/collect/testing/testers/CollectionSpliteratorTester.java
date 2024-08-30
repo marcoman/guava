@@ -42,6 +42,7 @@ import org.junit.Ignore;
  */
 @GwtCompatible(emulated = true)
 @Ignore // Affects only Android test runner, which respects JUnit 4 annotations on JUnit 3 tests.
+@SuppressWarnings("JUnit4ClassUsedInJUnit3")
 public class CollectionSpliteratorTester<E> extends AbstractCollectionTester<E> {
 
   @CollectionFeature.Require(absent = KNOWN_ORDER)
@@ -62,13 +63,13 @@ public class CollectionSpliteratorTester<E> extends AbstractCollectionTester<E> 
   }
 
   @CollectionFeature.Require(SUPPORTS_ADD)
-  public void testSpliteratorNotImmutable_CollectionAllowsAdd() {
+  public void testSpliteratorNotImmutable_collectionAllowsAdd() {
     // If add is supported, verify that IMMUTABLE is not reported.
     assertFalse(collection.spliterator().hasCharacteristics(Spliterator.IMMUTABLE));
   }
 
   @CollectionFeature.Require(SUPPORTS_REMOVE)
-  public void testSpliteratorNotImmutable_CollectionAllowsRemove() {
+  public void testSpliteratorNotImmutable_collectionAllowsRemove() {
     // If remove is supported, verify that IMMUTABLE is not reported.
     assertFalse(collection.spliterator().hasCharacteristics(Spliterator.IMMUTABLE));
   }
@@ -77,13 +78,13 @@ public class CollectionSpliteratorTester<E> extends AbstractCollectionTester<E> 
   @GwtIncompatible // reflection
   public static Method getSpliteratorNotImmutableCollectionAllowsAddMethod() {
     return Helpers.getMethod(
-        CollectionSpliteratorTester.class, "testSpliteratorNotImmutable_CollectionAllowsAdd");
+        CollectionSpliteratorTester.class, "testSpliteratorNotImmutable_collectionAllowsAdd");
   }
 
   @J2ktIncompatible
   @GwtIncompatible // reflection
   public static Method getSpliteratorNotImmutableCollectionAllowsRemoveMethod() {
     return Helpers.getMethod(
-        CollectionSpliteratorTester.class, "testSpliteratorNotImmutable_CollectionAllowsRemove");
+        CollectionSpliteratorTester.class, "testSpliteratorNotImmutable_collectionAllowsRemove");
   }
 }

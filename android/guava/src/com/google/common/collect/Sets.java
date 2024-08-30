@@ -177,8 +177,10 @@ public final class Sets {
    *
    * <p><b>Note:</b> this method is now unnecessary and should be treated as deprecated. Instead,
    * use the {@code HashSet} constructor directly, taking advantage of <a
-   * href="http://goo.gl/iz2Wi">"diamond" syntax</a>.
+   * href="https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html#type-inference-instantiation">"diamond"
+   * syntax</a>.
    */
+  @SuppressWarnings("NonApiType") // acts as a direct substitute for a constructor call
   public static <E extends @Nullable Object> HashSet<E> newHashSet() {
     return new HashSet<>();
   }
@@ -196,7 +198,7 @@ public final class Sets {
    * asList}{@code (...))}, or for creating an empty set then calling {@link Collections#addAll}.
    * This method is not actually very useful and will likely be deprecated in the future.
    */
-  @SuppressWarnings("nullness") // TODO: b/316358623 - Remove after checker fix.
+  @SuppressWarnings("NonApiType") // acts as a direct substitute for a constructor call
   public static <E extends @Nullable Object> HashSet<E> newHashSet(E... elements) {
     HashSet<E> set = newHashSetWithExpectedSize(elements.length);
     Collections.addAll(set, elements);
@@ -217,10 +219,12 @@ public final class Sets {
    *
    * <p><b>Note:</b> if {@code elements} is a {@link Collection}, you don't need this method.
    * Instead, use the {@code HashSet} constructor directly, taking advantage of <a
-   * href="http://goo.gl/iz2Wi">"diamond" syntax</a>.
+   * href="https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html#type-inference-instantiation">"diamond"
+   * syntax</a>.
    *
    * <p>Overall, this method is not very useful and will likely be deprecated in the future.
    */
+  @SuppressWarnings("NonApiType") // acts as a direct substitute for a constructor call
   public static <E extends @Nullable Object> HashSet<E> newHashSet(Iterable<? extends E> elements) {
     return (elements instanceof Collection)
         ? new HashSet<E>((Collection<? extends E>) elements)
@@ -239,6 +243,7 @@ public final class Sets {
    *
    * <p>Overall, this method is not very useful and will likely be deprecated in the future.
    */
+  @SuppressWarnings("NonApiType") // acts as a direct substitute for a constructor call
   public static <E extends @Nullable Object> HashSet<E> newHashSet(Iterator<? extends E> elements) {
     HashSet<E> set = newHashSet();
     Iterators.addAll(set, elements);
@@ -257,6 +262,7 @@ public final class Sets {
    *     without resizing
    * @throws IllegalArgumentException if {@code expectedSize} is negative
    */
+  @SuppressWarnings("NonApiType") // acts as a direct substitute for a constructor call
   public static <E extends @Nullable Object> HashSet<E> newHashSetWithExpectedSize(
       int expectedSize) {
     return new HashSet<>(Maps.capacity(expectedSize));
@@ -304,10 +310,12 @@ public final class Sets {
    *
    * <p><b>Note:</b> this method is now unnecessary and should be treated as deprecated. Instead,
    * use the {@code LinkedHashSet} constructor directly, taking advantage of <a
-   * href="http://goo.gl/iz2Wi">"diamond" syntax</a>.
+   * href="https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html#type-inference-instantiation">"diamond"
+   * syntax</a>.
    *
    * @return a new, empty {@code LinkedHashSet}
    */
+  @SuppressWarnings("NonApiType") // acts as a direct substitute for a constructor call
   public static <E extends @Nullable Object> LinkedHashSet<E> newLinkedHashSet() {
     return new LinkedHashSet<>();
   }
@@ -320,13 +328,15 @@ public final class Sets {
    *
    * <p><b>Note:</b> if {@code elements} is a {@link Collection}, you don't need this method.
    * Instead, use the {@code LinkedHashSet} constructor directly, taking advantage of <a
-   * href="http://goo.gl/iz2Wi">"diamond" syntax</a>.
+   * href="https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html#type-inference-instantiation">"diamond"
+   * syntax</a>.
    *
    * <p>Overall, this method is not very useful and will likely be deprecated in the future.
    *
    * @param elements the elements that the set should contain, in order
    * @return a new {@code LinkedHashSet} containing those elements (minus duplicates)
    */
+  @SuppressWarnings("NonApiType") // acts as a direct substitute for a constructor call
   public static <E extends @Nullable Object> LinkedHashSet<E> newLinkedHashSet(
       Iterable<? extends E> elements) {
     if (elements instanceof Collection) {
@@ -349,6 +359,7 @@ public final class Sets {
    * @throws IllegalArgumentException if {@code expectedSize} is negative
    * @since 11.0
    */
+  @SuppressWarnings("NonApiType") // acts as a direct substitute for a constructor call
   public static <E extends @Nullable Object> LinkedHashSet<E> newLinkedHashSetWithExpectedSize(
       int expectedSize) {
     return new LinkedHashSet<>(Maps.capacity(expectedSize));
@@ -364,11 +375,15 @@ public final class Sets {
    *
    * <p><b>Note:</b> this method is now unnecessary and should be treated as deprecated. Instead,
    * use the {@code TreeSet} constructor directly, taking advantage of <a
-   * href="http://goo.gl/iz2Wi">"diamond" syntax</a>.
+   * href="https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html#type-inference-instantiation">"diamond"
+   * syntax</a>.
    *
    * @return a new, empty {@code TreeSet}
    */
-  @SuppressWarnings("rawtypes") // https://github.com/google/guava/issues/989
+  @SuppressWarnings({
+    "rawtypes", // https://github.com/google/guava/issues/989
+    "NonApiType", // acts as a direct substitute for a constructor call
+  })
   public static <E extends Comparable> TreeSet<E> newTreeSet() {
     return new TreeSet<>();
   }
@@ -386,7 +401,8 @@ public final class Sets {
    *
    * <p><b>Note:</b> this method is now unnecessary and should be treated as deprecated. Instead,
    * use the {@code TreeSet} constructor directly, taking advantage of <a
-   * href="http://goo.gl/iz2Wi">"diamond" syntax</a>.
+   * href="https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html#type-inference-instantiation">"diamond"
+   * syntax</a>.
    *
    * <p>This method is just a small convenience for creating an empty set and then calling {@link
    * Iterables#addAll}. This method is not very useful and will likely be deprecated in the future.
@@ -394,7 +410,10 @@ public final class Sets {
    * @param elements the elements that the set should contain
    * @return a new {@code TreeSet} containing those elements (minus duplicates)
    */
-  @SuppressWarnings("rawtypes") // https://github.com/google/guava/issues/989
+  @SuppressWarnings({
+    "rawtypes", // https://github.com/google/guava/issues/989
+    "NonApiType", // acts as a direct substitute for a constructor call
+  })
   public static <E extends Comparable> TreeSet<E> newTreeSet(Iterable<? extends E> elements) {
     TreeSet<E> set = newTreeSet();
     Iterables.addAll(set, elements);
@@ -409,14 +428,16 @@ public final class Sets {
    *
    * <p><b>Note:</b> this method is now unnecessary and should be treated as deprecated. Instead,
    * use the {@code TreeSet} constructor directly, taking advantage of <a
-   * href="http://goo.gl/iz2Wi">"diamond" syntax</a>. One caveat to this is that the {@code TreeSet}
-   * constructor uses a null {@code Comparator} to mean "natural ordering," whereas this factory
-   * rejects null. Clean your code accordingly.
+   * href="https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html#type-inference-instantiation">"diamond"
+   * syntax</a>. One caveat to this is that the {@code TreeSet} constructor uses a null {@code
+   * Comparator} to mean "natural ordering," whereas this factory rejects null. Clean your code
+   * accordingly.
    *
    * @param comparator the comparator to use to sort the set
    * @return a new, empty {@code TreeSet}
    * @throws NullPointerException if {@code comparator} is null
    */
+  @SuppressWarnings("NonApiType") // acts as a direct substitute for a constructor call
   public static <E extends @Nullable Object> TreeSet<E> newTreeSet(
       Comparator<? super E> comparator) {
     return new TreeSet<>(checkNotNull(comparator));

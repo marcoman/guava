@@ -825,21 +825,21 @@ public class ImmutableSortedMapTest extends TestCase {
     }
   }
 
-  public void testBuilderGenerics_SelfComparable() {
-    ImmutableSortedMap.Builder<SelfComparableExample, Object> natural =
+  public void testBuilderGenerics_selfComparable() {
+    ImmutableSortedMap.Builder<SelfComparableExample, Object> unusedNatural =
         ImmutableSortedMap.naturalOrder();
 
-    ImmutableSortedMap.Builder<SelfComparableExample, Object> reverse =
+    ImmutableSortedMap.Builder<SelfComparableExample, Object> unusedReverse =
         ImmutableSortedMap.reverseOrder();
   }
 
   private static class SuperComparableExample extends SelfComparableExample {}
 
-  public void testBuilderGenerics_SuperComparable() {
-    ImmutableSortedMap.Builder<SuperComparableExample, Object> natural =
+  public void testBuilderGenerics_superComparable() {
+    ImmutableSortedMap.Builder<SuperComparableExample, Object> unusedNatural =
         ImmutableSortedMap.naturalOrder();
 
-    ImmutableSortedMap.Builder<SuperComparableExample, Object> reverse =
+    ImmutableSortedMap.Builder<SuperComparableExample, Object> unusedReverse =
         ImmutableSortedMap.reverseOrder();
   }
 }

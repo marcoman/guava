@@ -130,6 +130,13 @@
   <build>
     <plugins>
       <plugin>
+        <groupId>org.mvnsearch</groupId>
+        <artifactId>toolchains-maven-plugin</artifactId>
+      </plugin>
+      <plugin>
+        <artifactId>maven-toolchains-plugin</artifactId>
+      </plugin>
+      <plugin>
         <artifactId>maven-compiler-plugin</artifactId>
         <configuration>
           <excludes>
@@ -345,6 +352,7 @@
           </execution>
         </executions>
       </plugin>
+      <!-- TODO(cpovirk): We really should try tbroyer's plugin instead of this legacy one. -->
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>gwt-maven-plugin</artifactId>

@@ -282,7 +282,7 @@ public class FuturesTest extends TestCase {
   @AndroidIncompatible
   @J2ktIncompatible
   @GwtIncompatible // StackOverflowError
-  public void testTransform_StackOverflow() throws Exception {
+  public void testTransform_stackOverflow() throws Exception {
     {
       /*
        * Initialize all relevant classes before running the test, which may otherwise poison any
@@ -305,7 +305,7 @@ public class FuturesTest extends TestCase {
     }
   }
 
-  public void testTransform_ErrorAfterCancellation() throws Exception {
+  public void testTransform_errorAfterCancellation() throws Exception {
     class Transformer implements Function<Object, Object> {
       @SuppressWarnings("nullness:initialization.field.uninitialized")
       ListenableFuture<Object> output;
@@ -326,7 +326,7 @@ public class FuturesTest extends TestCase {
     assertTrue(output.isCancelled());
   }
 
-  public void testTransform_ExceptionAfterCancellation() throws Exception {
+  public void testTransform_exceptionAfterCancellation() throws Exception {
     class Transformer implements Function<Object, Object> {
       @SuppressWarnings("nullness:initialization.field.uninitialized")
       ListenableFuture<Object> output;
@@ -441,8 +441,8 @@ public class FuturesTest extends TestCase {
           }
         };
 
-    ListenableFuture<String> futureResult =
-        transformAsync(input, function, newSingleThreadExecutor());
+    ExecutorService service = newSingleThreadExecutor();
+    ListenableFuture<String> futureResult = transformAsync(input, function, service);
 
     input.set("value");
     inFunction.await();
@@ -457,6 +457,8 @@ public class FuturesTest extends TestCase {
     // https://github.com/google/guava/issues/1989
     assertEquals(1, gotException.getCount());
     // gotException.await();
+    service.shutdown();
+    service.awaitTermination(30, SECONDS);
   }
 
   public void testTransformAsync_cancelPropagatesToAsyncOutput() throws Exception {
@@ -516,7 +518,7 @@ public class FuturesTest extends TestCase {
   @AndroidIncompatible
   @J2ktIncompatible
   @GwtIncompatible // StackOverflowError
-  public void testTransformAsync_StackOverflow() throws Exception {
+  public void testTransformAsync_stackOverflow() throws Exception {
     {
       /*
        * Initialize all relevant classes before running the test, which may otherwise poison any
@@ -539,7 +541,7 @@ public class FuturesTest extends TestCase {
     }
   }
 
-  public void testTransformAsync_ErrorAfterCancellation() throws Exception {
+  public void testTransformAsync_errorAfterCancellation() throws Exception {
     class Transformer implements AsyncFunction<Object, Object> {
       @SuppressWarnings("nullness:initialization.field.uninitialized")
       ListenableFuture<Object> output;
@@ -560,7 +562,7 @@ public class FuturesTest extends TestCase {
     assertTrue(output.isCancelled());
   }
 
-  public void testTransformAsync_ExceptionAfterCancellation() throws Exception {
+  public void testTransformAsync_exceptionAfterCancellation() throws Exception {
     class Transformer implements AsyncFunction<Object, Object> {
       @SuppressWarnings("nullness:initialization.field.uninitialized")
       ListenableFuture<Object> output;
@@ -807,7 +809,7 @@ public class FuturesTest extends TestCase {
     }
   }
 
-  public void testTransform_Executor() throws Exception {
+  public void testTransform_executor() throws Exception {
     Object value = new Object();
     ExecutorSpy spy = new ExecutorSpy(directExecutor());
 
@@ -1167,8 +1169,9 @@ public class FuturesTest extends TestCase {
           }
         };
 
+    ExecutorService executor = newSingleThreadExecutor();
     ListenableFuture<String> futureResult =
-        catchingAsync(input, Exception.class, function, newSingleThreadExecutor());
+        catchingAsync(input, Exception.class, function, executor);
 
     input.setException(new Exception());
     inFunction.await();
@@ -1183,6 +1186,8 @@ public class FuturesTest extends TestCase {
     // https://github.com/google/guava/issues/1989
     assertEquals(1, gotException.getCount());
     // gotException.await();
+    executor.shutdown();
+    executor.awaitTermination(30, SECONDS);
   }
 
   @J2ktIncompatible
@@ -1359,7 +1364,7 @@ public class FuturesTest extends TestCase {
 
   // Some tests of the exceptionType parameter:
 
-  public void testCatching_Throwable() throws Exception {
+  public void testCatching_throwable() throws Exception {
     Function<Throwable, Integer> fallback = functionReturningOne();
     ListenableFuture<Integer> originalFuture = immediateFailedFuture(new IOException());
     ListenableFuture<Integer> faultTolerantFuture =
@@ -1394,7 +1399,7 @@ public class FuturesTest extends TestCase {
 
   @J2ktIncompatible
   @GwtIncompatible // StackOverflowError
-  public void testCatching_StackOverflow() throws Exception {
+  public void testCatching_stackOverflow() throws Exception {
     {
       /*
        * Initialize all relevant classes before running the test, which may otherwise poison any
@@ -1418,7 +1423,7 @@ public class FuturesTest extends TestCase {
     }
   }
 
-  public void testCatching_ErrorAfterCancellation() throws Exception {
+  public void testCatching_errorAfterCancellation() throws Exception {
     class Fallback implements Function<Throwable, Object> {
       @SuppressWarnings("nullness:initialization.field.uninitialized")
       ListenableFuture<Object> output;
@@ -1439,7 +1444,7 @@ public class FuturesTest extends TestCase {
     assertTrue(output.isCancelled());
   }
 
-  public void testCatching_ExceptionAfterCancellation() throws Exception {
+  public void testCatching_exceptionAfterCancellation() throws Exception {
     class Fallback implements Function<Throwable, Object> {
       @SuppressWarnings("nullness:initialization.field.uninitialized")
       ListenableFuture<Object> output;
@@ -1499,7 +1504,7 @@ public class FuturesTest extends TestCase {
     }
   }
 
-  public void testCatchingAsync_Throwable() throws Exception {
+  public void testCatchingAsync_throwable() throws Exception {
     AsyncFunction<Throwable, Integer> fallback = asyncFunctionReturningOne();
     ListenableFuture<Integer> originalFuture = immediateFailedFuture(new IOException());
     ListenableFuture<Integer> faultTolerantFuture =
@@ -1534,7 +1539,7 @@ public class FuturesTest extends TestCase {
 
   @J2ktIncompatible
   @GwtIncompatible // StackOverflowError
-  public void testCatchingAsync_StackOverflow() throws Exception {
+  public void testCatchingAsync_stackOverflow() throws Exception {
     {
       /*
        * Initialize all relevant classes before running the test, which may otherwise poison any
@@ -1558,7 +1563,7 @@ public class FuturesTest extends TestCase {
     }
   }
 
-  public void testCatchingAsync_ErrorAfterCancellation() throws Exception {
+  public void testCatchingAsync_errorAfterCancellation() throws Exception {
     class Fallback implements AsyncFunction<Throwable, Object> {
       @SuppressWarnings("nullness:initialization.field.uninitialized")
       ListenableFuture<Object> output;
@@ -1580,7 +1585,7 @@ public class FuturesTest extends TestCase {
     assertTrue(output.isCancelled());
   }
 
-  public void testCatchingAsync_ExceptionAfterCancellation() throws Exception {
+  public void testCatchingAsync_exceptionAfterCancellation() throws Exception {
     class Fallback implements AsyncFunction<Throwable, Object> {
       @SuppressWarnings("nullness:initialization.field.uninitialized")
       ListenableFuture<Object> output;
@@ -1700,7 +1705,7 @@ public class FuturesTest extends TestCase {
   }
 
   @J2ktIncompatible // Wildcard generics
-  public void testTransformAsync_genericsWildcard_AsyncFunction() throws Exception {
+  public void testTransformAsync_genericsWildcard_asyncFunction() throws Exception {
     ListenableFuture<?> nullFuture = immediateFuture(null);
     ListenableFuture<?> chainedFuture =
         transformAsync(nullFuture, constantAsyncFunction(nullFuture), directExecutor());
@@ -1708,7 +1713,7 @@ public class FuturesTest extends TestCase {
   }
 
   @J2ktIncompatible // TODO(b/324550390): Enable
-  public void testTransformAsync_genericsHierarchy_AsyncFunction() throws Exception {
+  public void testTransformAsync_genericsHierarchy_asyncFunction() throws Exception {
     ListenableFuture<FooChild> future = immediateFuture(null);
     final BarChild barChild = new BarChild();
     AsyncFunction<Foo, BarChild> function =
@@ -1794,8 +1799,8 @@ public class FuturesTest extends TestCase {
           }
         };
     SettableFuture<String> inputFuture = SettableFuture.create();
-    ListenableFuture<Integer> future =
-        transformAsync(inputFuture, function, newSingleThreadExecutor());
+    ExecutorService service = newSingleThreadExecutor();
+    ListenableFuture<Integer> future = transformAsync(inputFuture, function, service);
     inputFuture.set("value");
     inFunction.await();
     future.cancel(false);
@@ -1810,6 +1815,8 @@ public class FuturesTest extends TestCase {
       fail();
     } catch (CancellationException expected) {
     }
+    service.shutdown();
+    service.awaitTermination(30, SECONDS);
   }
 
   @J2ktIncompatible
@@ -1904,7 +1911,8 @@ public class FuturesTest extends TestCase {
           }
         };
     SettableFuture<String> inputFuture = SettableFuture.create();
-    ListenableFuture<Integer> future = submitAsync(callable, newSingleThreadExecutor());
+    ExecutorService service = newSingleThreadExecutor();
+    ListenableFuture<Integer> future = submitAsync(callable, service);
     inputFuture.set("value");
     inFunction.await();
     future.cancel(false);
@@ -1919,6 +1927,8 @@ public class FuturesTest extends TestCase {
       fail();
     } catch (CancellationException expected) {
     }
+    service.shutdown();
+    service.awaitTermination(30, SECONDS);
   }
 
   @J2ktIncompatible
@@ -2069,6 +2079,7 @@ public class FuturesTest extends TestCase {
   @J2ktIncompatible
   @GwtIncompatible // threads
   public void testScheduleAsync_asyncCallable_nullInsteadOfFuture() throws Exception {
+    ExecutorService service = newSingleThreadScheduledExecutor();
     ListenableFuture<?> chainedFuture =
         scheduleAsync(
             constantAsyncCallable(null), 1, NANOSECONDS, newSingleThreadScheduledExecutor());
@@ -2083,6 +2094,8 @@ public class FuturesTest extends TestCase {
               "AsyncCallable.call returned null instead of a Future. "
                   + "Did you mean to return immediateFuture(null)?");
     }
+    service.shutdown();
+    service.awaitTermination(30, SECONDS);
   }
 
   @J2ktIncompatible
@@ -2101,8 +2114,8 @@ public class FuturesTest extends TestCase {
             return resultFuture;
           }
         };
-    ListenableFuture<Integer> future =
-        scheduleAsync(callable, 1, NANOSECONDS, newSingleThreadScheduledExecutor());
+    ScheduledExecutorService service = newSingleThreadScheduledExecutor();
+    ListenableFuture<Integer> future = scheduleAsync(callable, 1, NANOSECONDS, service);
     inFunction.await();
     future.cancel(false);
     callableDone.countDown();
@@ -2116,6 +2129,8 @@ public class FuturesTest extends TestCase {
       fail();
     } catch (CancellationException expected) {
     }
+    service.shutdown();
+    service.awaitTermination(30, SECONDS);
   }
 
   @J2ktIncompatible
@@ -2716,8 +2731,9 @@ public class FuturesTest extends TestCase {
           }
         };
 
+    ExecutorService service = newSingleThreadExecutor();
     ListenableFuture<String> futureResult =
-        whenAllComplete(stringFuture, booleanFuture).callAsync(combiner, newSingleThreadExecutor());
+        whenAllComplete(stringFuture, booleanFuture).callAsync(combiner, service);
 
     stringFuture.set("value");
     booleanFuture.set(true);
@@ -2735,6 +2751,8 @@ public class FuturesTest extends TestCase {
       fail();
     } catch (CancellationException expected) {
     }
+    service.shutdown();
+    service.awaitTermination(30, SECONDS);
   }
 
   @J2ktIncompatible
@@ -2759,8 +2777,9 @@ public class FuturesTest extends TestCase {
           }
         };
 
+    ExecutorService service = newSingleThreadExecutor();
     ListenableFuture<String> futureResult =
-        whenAllComplete(stringFuture, booleanFuture).callAsync(combiner, newSingleThreadExecutor());
+        whenAllComplete(stringFuture, booleanFuture).callAsync(combiner, service);
 
     stringFuture.set("value");
     booleanFuture.set(true);
@@ -2772,6 +2791,8 @@ public class FuturesTest extends TestCase {
     } catch (CancellationException expected) {
     }
     gotException.await();
+    service.shutdown();
+    service.awaitTermination(30, SECONDS);
   }
 
   public void testWhenAllComplete_runnableResult() throws Exception {
@@ -2855,8 +2876,9 @@ public class FuturesTest extends TestCase {
           }
         };
 
+    ExecutorService service = newSingleThreadExecutor();
     ListenableFuture<?> futureResult =
-        whenAllComplete(stringFuture, booleanFuture).run(combiner, newSingleThreadExecutor());
+        whenAllComplete(stringFuture, booleanFuture).run(combiner, service);
 
     stringFuture.set("value");
     booleanFuture.set(true);
@@ -2869,11 +2891,13 @@ public class FuturesTest extends TestCase {
     } catch (CancellationException expected) {
     }
     combinerCompletedWithoutInterrupt.await();
+    service.shutdown();
+    service.awaitTermination(30, SECONDS);
   }
 
   @J2ktIncompatible
   @GwtIncompatible // threads
-  public void testWhenAllCompleteRunnable_resultCanceledWithInterrupt_InterruptsRunnable()
+  public void testWhenAllCompleteRunnable_resultCanceledWithInterrupt_interruptsRunnable()
       throws Exception {
     SettableFuture<String> stringFuture = SettableFuture.create();
     SettableFuture<Boolean> booleanFuture = SettableFuture.create();
@@ -2894,8 +2918,9 @@ public class FuturesTest extends TestCase {
           }
         };
 
+    ExecutorService service = newSingleThreadExecutor();
     ListenableFuture<?> futureResult =
-        whenAllComplete(stringFuture, booleanFuture).run(combiner, newSingleThreadExecutor());
+        whenAllComplete(stringFuture, booleanFuture).run(combiner, service);
 
     stringFuture.set("value");
     booleanFuture.set(true);
@@ -2907,6 +2932,8 @@ public class FuturesTest extends TestCase {
     } catch (CancellationException expected) {
     }
     gotException.await();
+    service.shutdown();
+    service.awaitTermination(30, SECONDS);
   }
 
   public void testWhenAllSucceed() throws Exception {
