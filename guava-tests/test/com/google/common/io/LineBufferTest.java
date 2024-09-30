@@ -18,6 +18,7 @@ package com.google.common.io;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import io.github.pixee.security.BoundedLineReader;
 import java.io.BufferedReader;
 import java.io.FilterReader;
 import java.io.IOException;
@@ -101,7 +102,7 @@ public class LineBufferTest extends IoTestCase {
     BufferedReader r = new BufferedReader(getChunkedReader(input, chunk));
     List<String> lines = Lists.newArrayList();
     String line;
-    while ((line = r.readLine()) != null) {
+    while ((line = BoundedLineReader.readLine(r, 5_000_000)) != null) {
       lines.add(line);
     }
     r.close();

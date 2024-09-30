@@ -17,6 +17,7 @@
 package com.google.common.io;
 
 import static com.google.common.truth.Truth.assertThat;
+import io.github.pixee.security.BoundedLineReader;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_16LE;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -230,7 +231,7 @@ public class FilesTest extends IoTestCase {
 
     BufferedReader r = Files.newReader(asciiFile, US_ASCII);
     try {
-      assertEquals(ASCII, r.readLine());
+      assertEquals(ASCII, BoundedLineReader.readLine(r, 5_000_000));
     } finally {
       r.close();
     }
