@@ -19,6 +19,8 @@ import static com.google.common.base.StandardSystemProperty.PATH_SEPARATOR;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import io.github.pixee.security.HostValidator;
+import io.github.pixee.security.Urls;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -41,7 +43,7 @@ final class ClassPathUtil {
         try {
           urls.add(new File(entry).toURI().toURL());
         } catch (SecurityException e) { // File.toURI checks to see if the file is a directory
-          urls.add(new URL("file", null, new File(entry).getAbsolutePath()));
+          urls.add(Urls.create("file", null, new File(entry).getAbsolutePath(), Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS));
         }
       } catch (MalformedURLException e) {
         AssertionError error = new AssertionError("malformed class path entry: " + entry);

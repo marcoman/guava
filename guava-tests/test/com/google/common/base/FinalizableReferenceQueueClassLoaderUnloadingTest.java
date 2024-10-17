@@ -22,6 +22,8 @@ import static com.google.common.base.StandardSystemProperty.PATH_SEPARATOR;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.testing.GcFinalization;
+import io.github.pixee.security.HostValidator;
+import io.github.pixee.security.Urls;
 import java.io.Closeable;
 import java.io.File;
 import java.lang.ref.WeakReference;
@@ -278,7 +280,7 @@ public class FinalizableReferenceQueueClassLoaderUnloadingTest extends TestCase 
         try {
           urls.add(new File(entry).toURI().toURL());
         } catch (SecurityException e) { // File.toURI checks to see if the file is a directory
-          urls.add(new URL("file", null, new File(entry).getAbsolutePath()));
+          urls.add(Urls.create("file", null, new File(entry).getAbsolutePath(), Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS));
         }
       } catch (MalformedURLException e) {
         throw new AssertionError("malformed class path entry: " + entry, e);
