@@ -73,7 +73,7 @@ public abstract class IoTestCase extends TestCase {
       throw new RuntimeException("unable to locate testdata directory");
     }
 
-    if (testFileUrl.getProtocol().equals("file")) {
+    if ("file".equals(testFileUrl.getProtocol())) {
       try {
         File testFile = new File(testFileUrl.toURI());
         testDir = testFile.getParentFile(); // the testdata directory

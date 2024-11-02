@@ -602,8 +602,8 @@ public class HashingTest extends TestCase {
       if (method.getReturnType().equals(HashFunction.class) // must return HashFunction
           && Modifier.isPublic(method.getModifiers()) // only the public methods
           && method.getParameterTypes().length != 0 // only the seeded hash functions
-          && !method.getName().equals("concatenating") // don't test Hashing.concatenating()
-          && !method.getName().equals("goodFastHash") // tested in testGoodFastHashEquals
+          && !"concatenating".equals(method.getName()) // don't test Hashing.concatenating()
+          && !"goodFastHash".equals(method.getName()) // tested in testGoodFastHashEquals
           && !method.getName().startsWith("hmac")) { // skip hmac functions
         Object[] params1 = new Object[method.getParameterTypes().length];
         Object[] params2 = new Object[method.getParameterTypes().length];

@@ -74,7 +74,7 @@ public class FeatureEnumTest extends TestCase {
       Class<E> featureEnumClass) {
     final Class<?>[] classes = featureEnumClass.getDeclaredClasses();
     for (Class<?> containedClass : classes) {
-      if (containedClass.getSimpleName().equals("Require")) {
+      if ("Require".equals(containedClass.getSimpleName())) {
         if (containedClass.isAnnotation()) {
           assertGoodTesterAnnotation(asAnnotation(containedClass));
         } else {

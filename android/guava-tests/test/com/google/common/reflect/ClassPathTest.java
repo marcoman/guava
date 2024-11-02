@@ -472,7 +472,7 @@ public class ClassPathTest extends TestCase {
     final PermissionCollection readClassPathFiles =
         new FilePermission("", "read").newPermissionCollection();
     for (URL url : ClassPath.parseJavaClassPath()) {
-      if (url.getProtocol().equalsIgnoreCase("file")) {
+      if ("file".equalsIgnoreCase(url.getProtocol())) {
         file = new File(url.toURI());
         readClassPathFiles.add(new FilePermission(file.getAbsolutePath(), "read"));
       }

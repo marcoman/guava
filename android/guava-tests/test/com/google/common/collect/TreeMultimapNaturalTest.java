@@ -510,7 +510,7 @@ public class TreeMultimapNaturalTest extends TestCase {
   @GwtIncompatible // reflection
   public void testKeySetBridgeMethods() {
     for (Method m : TreeMultimap.class.getMethods()) {
-      if (m.getName().equals("keySet") && m.getReturnType().equals(SortedSet.class)) {
+      if ("keySet".equals(m.getName()) && m.getReturnType().equals(SortedSet.class)) {
         return;
       }
     }
@@ -521,7 +521,7 @@ public class TreeMultimapNaturalTest extends TestCase {
   @GwtIncompatible // reflection
   public void testAsMapBridgeMethods() {
     for (Method m : TreeMultimap.class.getMethods()) {
-      if (m.getName().equals("asMap") && m.getReturnType().equals(SortedMap.class)) {
+      if ("asMap".equals(m.getName()) && m.getReturnType().equals(SortedMap.class)) {
         return;
       }
     }
@@ -531,7 +531,7 @@ public class TreeMultimapNaturalTest extends TestCase {
   @GwtIncompatible // reflection
   public void testGetBridgeMethods() {
     for (Method m : TreeMultimap.class.getMethods()) {
-      if (m.getName().equals("get") && m.getReturnType().equals(SortedSet.class)) {
+      if ("get".equals(m.getName()) && m.getReturnType().equals(SortedSet.class)) {
         return;
       }
     }
