@@ -18,6 +18,7 @@ package com.google.common.util.concurrent;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.lang.reflect.Modifier.isStatic;
+import java.security.SecureRandom;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
@@ -419,10 +420,10 @@ public class RateLimiterTest extends TestCase {
       int oneSecWorthOfWork = rate;
       stopwatch.sleepMillis(rate * 1000);
       limiter.setRate(rate);
-      long burst = measureTotalTimeMillis(limiter, oneSecWorthOfWork, new Random());
+      long burst = measureTotalTimeMillis(limiter, oneSecWorthOfWork, new SecureRandom());
       // we allow one second worth of work to go in a burst (i.e. take less than a second)
       assertTrue(burst <= 1000);
-      long afterBurst = measureTotalTimeMillis(limiter, oneSecWorthOfWork, new Random());
+      long afterBurst = measureTotalTimeMillis(limiter, oneSecWorthOfWork, new SecureRandom());
       // but work beyond that must take at least one second
       assertTrue(afterBurst >= 1000);
     }
@@ -435,7 +436,7 @@ public class RateLimiterTest extends TestCase {
    * [acquire(5), acquire(1)] takes exactly the same time as [acquire(2), acquire(3), acquire(1)].
    */
   public void testTimeToWarmUpIsHonouredEvenWithWeights() {
-    Random random = new Random();
+    Random random = new SecureRandom();
     int warmupPermits = 10;
     double[] coldFactorsToTest = {2.0, 3.0, 10.0};
     double[] qpsToTest = {4.0, 2.0, 1.0, 0.5, 0.1};

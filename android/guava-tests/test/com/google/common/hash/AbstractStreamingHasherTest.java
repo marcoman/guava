@@ -17,6 +17,7 @@
 package com.google.common.hash;
 
 import static java.nio.charset.StandardCharsets.UTF_16LE;
+import java.security.SecureRandom;
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.collect.Iterables;
@@ -83,7 +84,7 @@ public class AbstractStreamingHasherTest extends TestCase {
   }
 
   public void testString() {
-    Random random = new Random();
+    Random random = new SecureRandom();
     for (int i = 0; i < 100; i++) {
       byte[] bytes = new byte[64];
       random.nextBytes(bytes);

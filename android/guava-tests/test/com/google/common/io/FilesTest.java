@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static java.nio.charset.StandardCharsets.UTF_16LE;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import java.security.SecureRandom;
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.collect.ImmutableList;
@@ -526,7 +527,7 @@ public class FilesTest extends IoTestCase {
     File file = createTempFile();
     Files.write(bytes, file);
 
-    Random random = new Random();
+    Random random = new SecureRandom();
     random.nextBytes(expectedBytes);
 
     // Test

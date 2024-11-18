@@ -19,6 +19,7 @@ package com.google.common.io;
 import static com.google.common.io.SourceSinkFactory.ByteSourceFactory;
 import static com.google.common.io.SourceSinkFactory.CharSourceFactory;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import java.security.SecureRandom;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThrows;
 
@@ -81,7 +82,7 @@ public class ByteSourceTester extends SourceSinkTester<ByteSource, byte[], ByteS
 
     if (slice && bytes.length > 0) {
       // test a random slice() of the ByteSource
-      Random random = new Random();
+      Random random = new SecureRandom();
       byte[] expected = factory.getExpected(bytes);
       // if expected.length == 0, off has to be 0 but length doesn't matter--result will be empty
       int off = expected.length == 0 ? 0 : random.nextInt(expected.length);
@@ -187,7 +188,7 @@ public class ByteSourceTester extends SourceSinkTester<ByteSource, byte[], ByteS
               @Override
               public InputStream openStream() throws IOException {
                 return new RandomAmountInputStream(
-                    new ByteArrayInputStream(expected), new Random());
+                    new ByteArrayInputStream(expected), new SecureRandom());
               }
             }));
   }

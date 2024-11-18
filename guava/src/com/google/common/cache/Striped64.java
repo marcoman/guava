@@ -16,6 +16,7 @@ import java.lang.reflect.Field;
 import java.security.AccessController;
 import java.security.PrivilegedActionException;
 import java.security.PrivilegedExceptionAction;
+import java.security.SecureRandom;
 import java.util.Random;
 import javax.annotation.CheckForNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -136,7 +137,7 @@ abstract class Striped64 extends Number {
   static final ThreadLocal<int @Nullable []> threadHashCode = new ThreadLocal<>();
 
   /** Generator of new random hash codes */
-  static final Random rng = new Random();
+  static final Random rng = new SecureRandom();
 
   /** Number of CPUS, to place bound on table size */
   static final int NCPU = Runtime.getRuntime().availableProcessors();
