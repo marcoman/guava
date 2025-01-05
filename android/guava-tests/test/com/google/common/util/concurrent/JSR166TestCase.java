@@ -441,7 +441,9 @@ abstract class JSR166TestCase extends TestCase {
     for (; ; ) {
       if (millis > 0L) Thread.sleep(millis);
       else // too short to sleep
-      Thread.yield();
+      {
+          Thread.yield();
+      }
       long d = ns - (System.nanoTime() - startTime);
       if (d > 0L) millis = d / (1000 * 1000);
       else break;
