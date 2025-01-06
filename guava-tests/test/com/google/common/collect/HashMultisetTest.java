@@ -28,10 +28,10 @@ import com.google.common.collect.testing.google.MultisetTestSuiteBuilder;
 import com.google.common.collect.testing.google.TestStringMultisetGenerator;
 import com.google.common.testing.SerializableTester;
 import java.io.Serializable;
-import java.util.Arrays;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * Unit test for {@link HashMultiset}.
@@ -40,7 +40,7 @@ import junit.framework.TestSuite;
  * @author Jared Levy
  */
 @GwtCompatible(emulated = true)
-@ElementTypesAreNonnullByDefault
+@NullMarked
 public class HashMultisetTest extends TestCase {
 
   @J2ktIncompatible
@@ -62,6 +62,7 @@ public class HashMultisetTest extends TestCase {
     return suite;
   }
 
+  @J2ktIncompatible
   private static TestStringMultisetGenerator hashMultisetGenerator() {
     return new TestStringMultisetGenerator() {
       @Override
@@ -88,7 +89,7 @@ public class HashMultisetTest extends TestCase {
   }
 
   public void testCreateFromIterable() {
-    Multiset<String> multiset = HashMultiset.create(Arrays.asList("foo", "bar", "foo"));
+    Multiset<String> multiset = HashMultiset.create(asList("foo", "bar", "foo"));
     assertEquals(3, multiset.size());
     assertEquals(2, multiset.count("foo"));
   }

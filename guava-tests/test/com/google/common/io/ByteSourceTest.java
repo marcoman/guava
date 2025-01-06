@@ -24,6 +24,8 @@ import static com.google.common.io.TestOption.READ_THROWS;
 import static com.google.common.io.TestOption.SKIP_THROWS;
 import static com.google.common.io.TestOption.WRITE_THROWS;
 import static com.google.common.truth.Truth.assertThat;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static java.nio.charset.StandardCharsets.US_ASCII;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThrows;
@@ -40,13 +42,15 @@ import java.io.OutputStream;
 import java.util.Arrays;
 import java.util.EnumSet;
 import junit.framework.TestSuite;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Tests for the default implementations of {@code ByteSource} methods.
  *
  * @author Colin Decker
  */
+@NullUnmarked
 public class ByteSourceTest extends IoTestCase {
 
   @AndroidIncompatible // Android doesn't understand suites whose tests lack default constructors.
@@ -276,7 +280,7 @@ public class ByteSourceTest extends IoTestCase {
           return -1;
         }
 
-        int lenToRead = Math.min(len, bytes.length - pos);
+        int lenToRead = min(len, bytes.length - pos);
         System.arraycopy(bytes, pos, b, off, lenToRead);
         pos += lenToRead;
         return lenToRead;
@@ -292,7 +296,7 @@ public class ByteSourceTest extends IoTestCase {
    */
   private static void assertCorrectSlice(int input, int offset, long length, int expectRead)
       throws IOException {
-    checkArgument(expectRead == (int) Math.max(0, Math.min(input, offset + length) - offset));
+    checkArgument(expectRead == (int) max(0, min(input, offset + length) - offset));
 
     byte[] expected = newPreFilledByteArray(offset, expectRead);
 

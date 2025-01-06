@@ -30,7 +30,9 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.RandomAccess;
-import javax.annotation.CheckForNull;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Static utility methods pertaining to {@code long} primitives, that are not already found in
@@ -43,7 +45,6 @@ import javax.annotation.CheckForNull;
  * @since 1.0
  */
 @GwtCompatible
-@ElementTypesAreNonnullByDefault
 public final class Longs {
   private Longs() {}
 
@@ -229,6 +230,9 @@ public final class Longs {
    * unchanged. If {@code value} is less than {@code min}, {@code min} is returned, and if {@code
    * value} is greater than {@code max}, {@code max} is returned.
    *
+   * <p><b>Java 21+ users:</b> Use {@code Math.clamp} instead. Note that that method is capable of
+   * constraining a {@code long} input to an {@code int} range.
+   *
    * @param value the {@code long} value to constrain
    * @param min the lower bound (inclusive) of the range to constrain {@code value} to
    * @param max the upper bound (inclusive) of the range to constrain {@code value} to
@@ -371,8 +375,7 @@ public final class Longs {
    * @throws NullPointerException if {@code string} is {@code null}
    * @since 14.0
    */
-  @CheckForNull
-  public static Long tryParse(String string) {
+  public static @Nullable Long tryParse(String string) {
     return tryParse(string, 10);
   }
 
@@ -396,8 +399,7 @@ public final class Longs {
    * @throws NullPointerException if {@code string} is {@code null}
    * @since 19.0
    */
-  @CheckForNull
-  public static Long tryParse(String string, int radix) {
+  public static @Nullable Long tryParse(String string, int radix) {
     if (checkNotNull(string).isEmpty()) {
       return null;
     }
@@ -749,13 +751,24 @@ public final class Longs {
     }
 
     @Override
-    public boolean contains(@CheckForNull Object target) {
+    @SuppressWarnings("Java7ApiChecker")
+    /*
+     * This is an override that is not directly visible to callers, so NewApi will catch calls to
+     * Collection.spliterator() where necessary.
+     */
+    @IgnoreJRERequirement
+    public Spliterator.OfLong spliterator() {
+      return Spliterators.spliterator(array, start, end, 0);
+    }
+
+    @Override
+    public boolean contains(@Nullable Object target) {
       // Overridden to prevent a ton of boxing
       return (target instanceof Long) && Longs.indexOf(array, (Long) target, start, end) != -1;
     }
 
     @Override
-    public int indexOf(@CheckForNull Object target) {
+    public int indexOf(@Nullable Object target) {
       // Overridden to prevent a ton of boxing
       if (target instanceof Long) {
         int i = Longs.indexOf(array, (Long) target, start, end);
@@ -767,7 +780,7 @@ public final class Longs {
     }
 
     @Override
-    public int lastIndexOf(@CheckForNull Object target) {
+    public int lastIndexOf(@Nullable Object target) {
       // Overridden to prevent a ton of boxing
       if (target instanceof Long) {
         int i = Longs.lastIndexOf(array, (Long) target, start, end);
@@ -798,7 +811,7 @@ public final class Longs {
     }
 
     @Override
-    public boolean equals(@CheckForNull Object object) {
+    public boolean equals(@Nullable Object object) {
       if (object == this) {
         return true;
       }

@@ -19,8 +19,10 @@ import com.google.common.annotations.GwtIncompatible;
 import com.google.common.annotations.J2ktIncompatible;
 import com.google.common.testing.NullPointerTester;
 import java.util.Arrays;
+import org.jspecify.annotations.NullUnmarked;
 
 /** Unit test for {@link AtomicDoubleArray}. */
+@NullUnmarked
 public class AtomicDoubleArrayTest extends JSR166TestCase {
 
   private static final double[] VALUES = {
@@ -161,6 +163,7 @@ public class AtomicDoubleArrayTest extends JSR166TestCase {
         newStartedThread(
             new CheckedRunnable() {
               @Override
+              @SuppressWarnings("ThreadPriorityCheck") // doing our best to test for races
               public void realRun() {
                 while (!a.compareAndSet(0, 2.0, 3.0)) {
                   Thread.yield();

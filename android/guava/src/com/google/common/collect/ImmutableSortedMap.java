@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.CollectPreconditions.checkEntryNotNull;
 import static com.google.common.collect.Maps.keyOrNull;
+import static java.util.Arrays.sort;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -40,8 +41,7 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
-import javax.annotation.CheckForNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A {@link NavigableMap} whose contents will never change, with many other important properties
@@ -61,7 +61,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @since 2.0 (implements {@code NavigableMap} since 12.0)
  */
 @GwtCompatible(serializable = true, emulated = true)
-@ElementTypesAreNonnullByDefault
 public final class ImmutableSortedMap<K, V> extends ImmutableMap<K, V>
     implements NavigableMap<K, V> {
   /**
@@ -76,7 +75,7 @@ public final class ImmutableSortedMap<K, V> extends ImmutableMap<K, V>
    *
    * @since 33.2.0 (available since 21.0 in guava-jre)
    */
-  @SuppressWarnings({"AndroidJdkLibsChecker", "Java7ApiChecker"})
+  @SuppressWarnings("Java7ApiChecker")
   @IgnoreJRERequirement // Users will use this only if they're already using streams.
   public static <T extends @Nullable Object, K, V>
       Collector<T, ?, ImmutableSortedMap<K, V>> toImmutableSortedMap(
@@ -97,7 +96,7 @@ public final class ImmutableSortedMap<K, V> extends ImmutableMap<K, V>
    *
    * @since 33.2.0 (available since 21.0 in guava-jre)
    */
-  @SuppressWarnings({"AndroidJdkLibsChecker", "Java7ApiChecker"})
+  @SuppressWarnings("Java7ApiChecker")
   @IgnoreJRERequirement // Users will use this only if they're already using streams.
   public static <T extends @Nullable Object, K, V>
       Collector<T, ?, ImmutableSortedMap<K, V>> toImmutableSortedMap(
@@ -295,7 +294,11 @@ public final class ImmutableSortedMap<K, V> extends ImmutableMap<K, V>
       V v8,
       K k9,
       V v9) {
-    return fromEntries(
+    /*
+     * This explicit type parameter works around what seems to be a javac bug in certain
+     * configurations: b/339186525#comment6
+     */
+    return ImmutableSortedMap.<K, V>fromEntries(
         entryOf(k1, v1),
         entryOf(k2, v2),
         entryOf(k3, v3),
@@ -524,7 +527,7 @@ public final class ImmutableSortedMap<K, V> extends ImmutableMap<K, V>
           // Need to sort and check for nulls and dupes.
           // Inline the Comparator implementation rather than transforming with a Function
           // to save code size.
-          Arrays.sort(
+          sort(
               entryArray,
               0,
               size,
@@ -806,7 +809,7 @@ public final class ImmutableSortedMap<K, V> extends ImmutableMap<K, V>
 
   private final transient RegularImmutableSortedSet<K> keySet;
   private final transient ImmutableList<V> valueList;
-  @CheckForNull private transient ImmutableSortedMap<K, V> descendingMap;
+  private transient @Nullable ImmutableSortedMap<K, V> descendingMap;
 
   ImmutableSortedMap(RegularImmutableSortedSet<K> keySet, ImmutableList<V> valueList) {
     this(keySet, valueList, null);
@@ -815,7 +818,7 @@ public final class ImmutableSortedMap<K, V> extends ImmutableMap<K, V>
   ImmutableSortedMap(
       RegularImmutableSortedSet<K> keySet,
       ImmutableList<V> valueList,
-      @CheckForNull ImmutableSortedMap<K, V> descendingMap) {
+      @Nullable ImmutableSortedMap<K, V> descendingMap) {
     this.keySet = keySet;
     this.valueList = valueList;
     this.descendingMap = descendingMap;
@@ -827,8 +830,7 @@ public final class ImmutableSortedMap<K, V> extends ImmutableMap<K, V>
   }
 
   @Override
-  @CheckForNull
-  public V get(@CheckForNull Object key) {
+  public @Nullable V get(@Nullable Object key) {
     int index = keySet.indexOf(key);
     return (index == -1) ? null : valueList.get(index);
   }
@@ -1057,62 +1059,52 @@ public final class ImmutableSortedMap<K, V> extends ImmutableMap<K, V>
   }
 
   @Override
-  @CheckForNull
-  public Entry<K, V> lowerEntry(K key) {
+  public @Nullable Entry<K, V> lowerEntry(K key) {
     return headMap(key, false).lastEntry();
   }
 
   @Override
-  @CheckForNull
-  public K lowerKey(K key) {
+  public @Nullable K lowerKey(K key) {
     return keyOrNull(lowerEntry(key));
   }
 
   @Override
-  @CheckForNull
-  public Entry<K, V> floorEntry(K key) {
+  public @Nullable Entry<K, V> floorEntry(K key) {
     return headMap(key, true).lastEntry();
   }
 
   @Override
-  @CheckForNull
-  public K floorKey(K key) {
+  public @Nullable K floorKey(K key) {
     return keyOrNull(floorEntry(key));
   }
 
   @Override
-  @CheckForNull
-  public Entry<K, V> ceilingEntry(K key) {
+  public @Nullable Entry<K, V> ceilingEntry(K key) {
     return tailMap(key, true).firstEntry();
   }
 
   @Override
-  @CheckForNull
-  public K ceilingKey(K key) {
+  public @Nullable K ceilingKey(K key) {
     return keyOrNull(ceilingEntry(key));
   }
 
   @Override
-  @CheckForNull
-  public Entry<K, V> higherEntry(K key) {
+  public @Nullable Entry<K, V> higherEntry(K key) {
     return tailMap(key, false).firstEntry();
   }
 
   @Override
-  @CheckForNull
-  public K higherKey(K key) {
+  public @Nullable K higherKey(K key) {
     return keyOrNull(higherEntry(key));
   }
 
   @Override
-  @CheckForNull
-  public Entry<K, V> firstEntry() {
+  public @Nullable Entry<K, V> firstEntry() {
     return isEmpty() ? null : entrySet().asList().get(0);
   }
 
   @Override
-  @CheckForNull
-  public Entry<K, V> lastEntry() {
+  public @Nullable Entry<K, V> lastEntry() {
     return isEmpty() ? null : entrySet().asList().get(size() - 1);
   }
 
@@ -1126,8 +1118,7 @@ public final class ImmutableSortedMap<K, V> extends ImmutableMap<K, V>
   @Deprecated
   @Override
   @DoNotCall("Always throws UnsupportedOperationException")
-  @CheckForNull
-  public final Entry<K, V> pollFirstEntry() {
+  public final @Nullable Entry<K, V> pollFirstEntry() {
     throw new UnsupportedOperationException();
   }
 
@@ -1141,8 +1132,7 @@ public final class ImmutableSortedMap<K, V> extends ImmutableMap<K, V>
   @Deprecated
   @Override
   @DoNotCall("Always throws UnsupportedOperationException")
-  @CheckForNull
-  public final Entry<K, V> pollLastEntry() {
+  public final @Nullable Entry<K, V> pollLastEntry() {
     throw new UnsupportedOperationException();
   }
 
@@ -1223,7 +1213,7 @@ public final class ImmutableSortedMap<K, V> extends ImmutableMap<K, V>
    */
   @DoNotCall("Use toImmutableSortedMap")
   @Deprecated
-  @SuppressWarnings({"AndroidJdkLibsChecker", "Java7ApiChecker"})
+  @SuppressWarnings("Java7ApiChecker")
   @IgnoreJRERequirement // Users will use this only if they're already using streams.
   public static <T extends @Nullable Object, K, V>
       Collector<T, ?, ImmutableMap<K, V>> toImmutableMap(
@@ -1243,7 +1233,7 @@ public final class ImmutableSortedMap<K, V> extends ImmutableMap<K, V>
    */
   @DoNotCall("Use toImmutableSortedMap")
   @Deprecated
-  @SuppressWarnings({"AndroidJdkLibsChecker", "Java7ApiChecker"})
+  @SuppressWarnings("Java7ApiChecker")
   @IgnoreJRERequirement // Users will use this only if they're already using streams.
   public static <T extends @Nullable Object, K, V>
       Collector<T, ?, ImmutableMap<K, V>> toImmutableMap(

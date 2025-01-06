@@ -17,15 +17,15 @@
 package com.google.common.collect.testing;
 
 import static com.google.common.collect.testing.Helpers.castOrCopyToList;
+import static com.google.common.collect.testing.Helpers.entryComparator;
 import static com.google.common.collect.testing.Helpers.equal;
 import static com.google.common.collect.testing.Helpers.mapEntry;
+import static java.util.Arrays.asList;
 import static java.util.Collections.sort;
 
 import com.google.common.annotations.GwtCompatible;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +33,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.SortedMap;
 import java.util.SortedSet;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Derived suite generators, split out of the suite builders so that they are available to GWT.
@@ -41,7 +42,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author George van den Driessche
  */
 @GwtCompatible
-@ElementTypesAreNonnullByDefault
+@NullMarked
 public final class DerivedCollectionGenerators {
   public static class MapEntrySetGenerator<K extends @Nullable Object, V extends @Nullable Object>
       implements TestSetGenerator<Entry<K, V>>, DerivedGenerator {
@@ -127,7 +128,7 @@ public final class DerivedCollectionGenerators {
       Collection<Entry<K, V>> entries = new ArrayList<>(elements.length);
       int i = 0;
       for (Entry<K, V> entry : originalEntries) {
-        entries.add(Helpers.mapEntry(keysArray[i++], entry.getValue()));
+        entries.add(mapEntry(keysArray[i++], entry.getValue()));
       }
 
       return mapGenerator.create(entries.toArray()).keySet();
@@ -236,7 +237,7 @@ public final class DerivedCollectionGenerators {
       Collection<Entry<K, V>> entries = new ArrayList<>(elements.length);
       int i = 0;
       for (Entry<K, V> entry : originalEntries) {
-        entries.add(Helpers.mapEntry(entry.getKey(), valuesArray[i++]));
+        entries.add(mapEntry(entry.getKey(), valuesArray[i++]));
       }
 
       return mapGenerator.create(entries.toArray()).values();
@@ -348,7 +349,7 @@ public final class DerivedCollectionGenerators {
 
       SampleElements<E> samples = delegate.samples();
       List<E> samplesList = new ArrayList<>(samples.asList());
-      Collections.sort(samplesList, comparator);
+      sort(samplesList, comparator);
       this.firstInclusive = samplesList.get(0);
       this.lastInclusive = samplesList.get(samplesList.size() - 1);
     }
@@ -382,7 +383,7 @@ public final class DerivedCollectionGenerators {
 
     @Override
     public SortedSet<E> create(Object... elements) {
-      List<?> normalValues = (List<?>) Arrays.asList(elements);
+      List<?> normalValues = (List<?>) asList(elements);
       List<E> extremeValues = new ArrayList<>();
 
       // nulls are usually out of bounds for a subset, so ban them altogether
@@ -467,13 +468,13 @@ public final class DerivedCollectionGenerators {
       this.from = from;
 
       SortedMap<K, V> emptyMap = delegate.create();
-      this.entryComparator = Helpers.entryComparator(emptyMap.comparator());
+      this.entryComparator = entryComparator(emptyMap.comparator());
 
       // derive values for inclusive filtering from the input samples
       SampleElements<Entry<K, V>> samples = delegate.samples();
       List<Entry<K, V>> samplesList =
-          Arrays.asList(samples.e0(), samples.e1(), samples.e2(), samples.e3(), samples.e4());
-      Collections.sort(samplesList, entryComparator);
+          asList(samples.e0(), samples.e1(), samples.e2(), samples.e3(), samples.e4());
+      sort(samplesList, entryComparator);
       this.firstInclusive = samplesList.get(0).getKey();
       this.lastInclusive = samplesList.get(samplesList.size() - 1).getKey();
     }

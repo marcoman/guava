@@ -15,6 +15,9 @@
 package com.google.common.collect;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.Iterators.emptyIterator;
+import static com.google.common.collect.Iterators.singletonIterator;
+import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.truth.Truth.assertThat;
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertThrows;
@@ -45,12 +48,14 @@ import java.util.function.BiPredicate;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.jspecify.annotations.NullUnmarked;
 
 /**
  * Tests for {@link ImmutableSortedMultiset}.
  *
  * @author Louis Wasserman
  */
+@NullUnmarked
 public class ImmutableSortedMultisetTest extends TestCase {
   public static Test suite() {
     TestSuite suite = new TestSuite();
@@ -101,7 +106,7 @@ public class ImmutableSortedMultisetTest extends TestCase {
                 new TestStringListGenerator() {
                   @Override
                   protected List<String> create(String[] elements) {
-                    Set<String> set = Sets.newHashSet();
+                    Set<String> set = newHashSet();
                     ImmutableSortedMultiset.Builder<String> builder =
                         ImmutableSortedMultiset.naturalOrder();
                     for (String s : elements) {
@@ -195,8 +200,7 @@ public class ImmutableSortedMultisetTest extends TestCase {
   }
 
   public void testCopyOf_collection_empty() {
-    // "<String>" is required to work around a javac 1.5 bug.
-    Collection<String> c = MinimalCollection.<String>of();
+    Collection<String> c = MinimalCollection.of();
     Multiset<String> multiset = ImmutableSortedMultiset.copyOf(c);
     assertTrue(multiset.isEmpty());
   }
@@ -242,13 +246,13 @@ public class ImmutableSortedMultisetTest extends TestCase {
   }
 
   public void testCopyOf_iterator_empty() {
-    Iterator<String> iterator = Iterators.emptyIterator();
+    Iterator<String> iterator = emptyIterator();
     Multiset<String> multiset = ImmutableSortedMultiset.copyOf(iterator);
     assertTrue(multiset.isEmpty());
   }
 
   public void testCopyOf_iterator_oneElement() {
-    Iterator<String> iterator = Iterators.singletonIterator("a");
+    Iterator<String> iterator = singletonIterator("a");
     Multiset<String> multiset = ImmutableSortedMultiset.copyOf(iterator);
     assertEquals(HashMultiset.create(asList("a")), multiset);
   }

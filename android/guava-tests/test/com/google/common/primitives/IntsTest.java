@@ -16,6 +16,9 @@
 
 package com.google.common.primitives;
 
+import static com.google.common.primitives.Ints.max;
+import static com.google.common.primitives.Ints.min;
+import static com.google.common.primitives.ReflectionFreeAssertThrows.assertThrows;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -33,7 +36,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Random;
 import junit.framework.TestCase;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Unit test for {@link Ints}.
@@ -41,7 +45,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author Kevin Bourrillion
  */
 @GwtCompatible(emulated = true)
-@ElementTypesAreNonnullByDefault
+@NullMarked
 @SuppressWarnings("cast") // redundant casts are intentional and harmless
 public class IntsTest extends TestCase {
   private static final int[] EMPTY = {};
@@ -90,6 +94,8 @@ public class IntsTest extends TestCase {
     }
   }
 
+  // We need to test that our method behaves like the JDK method.
+  @SuppressWarnings("InlineMeInliner")
   public void testCompare() {
     for (int x : VALUES) {
       for (int y : VALUES) {
@@ -168,33 +174,25 @@ public class IntsTest extends TestCase {
 
   @GwtIncompatible
   public void testMax_noArgs() {
-    try {
-      Ints.max();
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> max());
   }
 
   public void testMax() {
-    assertThat(Ints.max(LEAST)).isEqualTo(LEAST);
-    assertThat(Ints.max(GREATEST)).isEqualTo(GREATEST);
-    assertThat(Ints.max((int) 8, (int) 6, (int) 7, (int) 5, (int) 3, (int) 0, (int) 9))
+    assertThat(max(LEAST)).isEqualTo(LEAST);
+    assertThat(max(GREATEST)).isEqualTo(GREATEST);
+    assertThat(max((int) 8, (int) 6, (int) 7, (int) 5, (int) 3, (int) 0, (int) 9))
         .isEqualTo((int) 9);
   }
 
   @GwtIncompatible
   public void testMin_noArgs() {
-    try {
-      Ints.min();
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> min());
   }
 
   public void testMin() {
-    assertThat(Ints.min(LEAST)).isEqualTo(LEAST);
-    assertThat(Ints.min(GREATEST)).isEqualTo(GREATEST);
-    assertThat(Ints.min((int) 8, (int) 6, (int) 7, (int) 5, (int) 3, (int) 0, (int) 9))
+    assertThat(min(LEAST)).isEqualTo(LEAST);
+    assertThat(min(GREATEST)).isEqualTo(GREATEST);
+    assertThat(min((int) 8, (int) 6, (int) 7, (int) 5, (int) 3, (int) 0, (int) 9))
         .isEqualTo((int) 0);
   }
 
@@ -204,11 +202,8 @@ public class IntsTest extends TestCase {
     assertThat(Ints.constrainToRange((int) 1, (int) 3, (int) 5)).isEqualTo((int) 3);
     assertThat(Ints.constrainToRange((int) 0, (int) -5, (int) -1)).isEqualTo((int) -1);
     assertThat(Ints.constrainToRange((int) 5, (int) 2, (int) 2)).isEqualTo((int) 2);
-    try {
-      Ints.constrainToRange((int) 1, (int) 3, (int) 2);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(
+        IllegalArgumentException.class, () -> Ints.constrainToRange((int) 1, (int) 3, (int) 2));
   }
 
   public void testConcat() {
@@ -268,11 +263,8 @@ public class IntsTest extends TestCase {
   }
 
   public void testFromByteArrayFails() {
-    try {
-      Ints.fromByteArray(new byte[Ints.BYTES - 1]);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(
+        IllegalArgumentException.class, () -> Ints.fromByteArray(new byte[Ints.BYTES - 1]));
   }
 
   public void testFromBytes() {
@@ -304,17 +296,8 @@ public class IntsTest extends TestCase {
   }
 
   public void testEnsureCapacity_fail() {
-    try {
-      Ints.ensureCapacity(ARRAY1, -1, 1);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
-    try {
-      // notice that this should even fail when no growth was needed
-      Ints.ensureCapacity(ARRAY1, 1, -1);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> Ints.ensureCapacity(ARRAY1, -1, 1));
+    assertThrows(IllegalArgumentException.class, () -> Ints.ensureCapacity(ARRAY1, 1, -1));
   }
 
   public void testJoin() {
@@ -543,11 +526,7 @@ public class IntsTest extends TestCase {
 
   public void testToArray_withNull() {
     List<@Nullable Integer> list = Arrays.asList((int) 0, (int) 1, null);
-    try {
-      Ints.toArray(list);
-      fail();
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(NullPointerException.class, () -> Ints.toArray(list));
   }
 
   public void testToArray_withConversion() {
@@ -621,11 +600,7 @@ public class IntsTest extends TestCase {
   }
 
   public void testStringConverter_convertError() {
-    try {
-      Ints.stringConverter().convert("notanumber");
-      fail();
-    } catch (NumberFormatException expected) {
-    }
+    assertThrows(NumberFormatException.class, () -> Ints.stringConverter().convert("notanumber"));
   }
 
   public void testStringConverter_nullConversions() {
@@ -719,27 +694,15 @@ public class IntsTest extends TestCase {
   }
 
   public void testTryParse_radixTooBig() {
-    try {
-      Ints.tryParse("0", Character.MAX_RADIX + 1);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> Ints.tryParse("0", Character.MAX_RADIX + 1));
   }
 
   public void testTryParse_radixTooSmall() {
-    try {
-      Ints.tryParse("0", Character.MIN_RADIX - 1);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> Ints.tryParse("0", Character.MIN_RADIX - 1));
   }
 
   public void testTryParse_withNullGwt() {
     assertThat(Ints.tryParse("null")).isNull();
-    try {
-      Ints.tryParse(null);
-      fail("Expected NPE");
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(NullPointerException.class, () -> Ints.tryParse(null));
   }
 }

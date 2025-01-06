@@ -30,12 +30,14 @@ import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Enumeration;
 import junit.framework.TestCase;
+import org.jspecify.annotations.NullUnmarked;
 
 /**
  * Tests for {@link InetAddresses}.
  *
  * @author Erik Kline
  */
+@NullUnmarked
 public class InetAddressesTest extends TestCase {
 
   public void testNulls() {
@@ -733,6 +735,7 @@ public class InetAddressesTest extends TestCase {
     assertTrue(InetAddresses.isMaximum(address));
   }
 
+  @SuppressWarnings("IdentifierName") // the best we could do for adjacent digit blocks
   public void testIncrementIPv4() throws UnknownHostException {
     InetAddress address_66_0 = InetAddress.getByName("172.24.66.0");
     InetAddress address_66_255 = InetAddress.getByName("172.24.66.255");
@@ -751,6 +754,7 @@ public class InetAddressesTest extends TestCase {
     assertThrows(IllegalArgumentException.class, () -> InetAddresses.increment(address_ffffff));
   }
 
+  @SuppressWarnings("IdentifierName") // the best we could do for adjacent digit blocks
   public void testIncrementIPv6() throws UnknownHostException {
     InetAddress addressV6_66_0 = InetAddress.getByName("2001:db8::6600");
     InetAddress addressV6_66_ff = InetAddress.getByName("2001:db8::66ff");
@@ -812,7 +816,9 @@ public class InetAddressesTest extends TestCase {
         assertThrows(
             IllegalArgumentException.class,
             () -> InetAddresses.fromIPv4BigInteger(BigInteger.valueOf(-1L)));
-    assertEquals("BigInteger must be greater than or equal to 0", expected.getMessage());
+    assertThat(expected)
+        .hasMessageThat()
+        .isEqualTo("BigInteger must be greater than or equal to 0");
   }
 
   public void testFromIpv6BigIntegerThrowsLessThanZero() {
@@ -820,7 +826,9 @@ public class InetAddressesTest extends TestCase {
         assertThrows(
             IllegalArgumentException.class,
             () -> InetAddresses.fromIPv6BigInteger(BigInteger.valueOf(-1L)));
-    assertEquals("BigInteger must be greater than or equal to 0", expected.getMessage());
+    assertThat(expected)
+        .hasMessageThat()
+        .isEqualTo("BigInteger must be greater than or equal to 0");
   }
 
   public void testFromIpv4BigIntegerValid() {
@@ -851,10 +859,11 @@ public class InetAddressesTest extends TestCase {
             IllegalArgumentException.class,
             () ->
                 InetAddresses.fromIPv4BigInteger(BigInteger.ONE.shiftLeft(32).add(BigInteger.ONE)));
-    assertEquals(
-        "BigInteger cannot be converted to InetAddress because it has more than 4 bytes:"
-            + " 4294967297",
-        expected.getMessage());
+    assertThat(expected)
+        .hasMessageThat()
+        .isEqualTo(
+            "BigInteger cannot be converted to InetAddress because it has more than 4 bytes:"
+                + " 4294967297");
   }
 
   public void testFromIpv6BigIntegerInputTooLarge() {
@@ -864,10 +873,11 @@ public class InetAddressesTest extends TestCase {
             () ->
                 InetAddresses.fromIPv6BigInteger(
                     BigInteger.ONE.shiftLeft(128).add(BigInteger.ONE)));
-    assertEquals(
-        "BigInteger cannot be converted to InetAddress because it has more than 16 bytes:"
-            + " 340282366920938463463374607431768211457",
-        expected.getMessage());
+    assertThat(expected)
+        .hasMessageThat()
+        .isEqualTo(
+            "BigInteger cannot be converted to InetAddress because it has more than 16 bytes:"
+                + " 340282366920938463463374607431768211457");
   }
 
   // see https://github.com/google/guava/issues/2587

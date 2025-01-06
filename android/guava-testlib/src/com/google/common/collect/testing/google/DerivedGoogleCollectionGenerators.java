@@ -16,10 +16,12 @@
 
 package com.google.common.collect.testing.google;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.testing.Helpers.mapEntry;
+
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.testing.DerivedGenerator;
-import com.google.common.collect.testing.Helpers;
 import com.google.common.collect.testing.OneSizeTestContainerGenerator;
 import com.google.common.collect.testing.SampleElements;
 import com.google.common.collect.testing.TestMapGenerator;
@@ -31,7 +33,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Derived suite generators for Guava collection interfaces, split out of the suite builders so that
@@ -40,7 +43,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author Louis Wasserman
  */
 @GwtCompatible
-@ElementTypesAreNonnullByDefault
+@NullMarked
 public final class DerivedGoogleCollectionGenerators {
   public static class MapGenerator<K extends @Nullable Object, V extends @Nullable Object>
       implements TestMapGenerator<K, V>, DerivedGenerator {
@@ -112,7 +115,8 @@ public final class DerivedGoogleCollectionGenerators {
     }
 
     private Entry<V, K> reverse(Entry<K, V> entry) {
-      return Helpers.mapEntry(entry.getValue(), entry.getKey());
+      checkNotNull(entry);
+      return mapEntry(entry.getValue(), entry.getKey());
     }
 
     @SuppressWarnings("unchecked")
@@ -189,7 +193,7 @@ public final class DerivedGoogleCollectionGenerators {
       Collection<Entry<K, V>> entries = new ArrayList<>(elements.length);
       int i = 0;
       for (Entry<K, V> entry : originalEntries) {
-        entries.add(Helpers.mapEntry(entry.getKey(), valuesArray[i++]));
+        entries.add(mapEntry(entry.getKey(), valuesArray[i++]));
       }
 
       return mapGenerator.create(entries.toArray()).values();

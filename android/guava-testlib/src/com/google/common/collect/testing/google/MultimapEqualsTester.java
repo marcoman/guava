@@ -14,20 +14,21 @@
 
 package com.google.common.collect.testing.google;
 
+import static com.google.common.collect.testing.Helpers.mapEntry;
 import static com.google.common.collect.testing.features.CollectionSize.ZERO;
 import static com.google.common.collect.testing.features.MapFeature.ALLOWS_NULL_KEYS;
 import static com.google.common.collect.testing.features.MapFeature.ALLOWS_NULL_VALUES;
 
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.testing.Helpers;
 import com.google.common.collect.testing.features.CollectionSize;
 import com.google.common.collect.testing.features.MapFeature;
 import com.google.common.testing.EqualsTester;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.junit.Ignore;
 
 /**
@@ -36,9 +37,10 @@ import org.junit.Ignore;
  * @author Louis Wasserman
  */
 @GwtCompatible
-@Ignore // Affects only Android test runner, which respects JUnit 4 annotations on JUnit 3 tests.
+@Ignore("test runners must not instantiate and run this directly, only via suites we build")
+// @Ignore affects the Android test runner, which respects JUnit 4 annotations on JUnit 3 tests.
 @SuppressWarnings("JUnit4ClassUsedInJUnit3")
-@ElementTypesAreNonnullByDefault
+@NullMarked
 public class MultimapEqualsTester<K extends @Nullable Object, V extends @Nullable Object>
     extends AbstractMultimapTester<K, V, Multimap<K, V>> {
   public void testEqualsTrue() {
@@ -49,7 +51,7 @@ public class MultimapEqualsTester<K extends @Nullable Object, V extends @Nullabl
 
   public void testEqualsFalse() {
     List<Entry<K, V>> targetEntries = new ArrayList<>(getSampleElements());
-    targetEntries.add(Helpers.mapEntry(k0(), v3()));
+    targetEntries.add(mapEntry(k0(), v3()));
     new EqualsTester()
         .addEqualityGroup(multimap())
         .addEqualityGroup(getSubjectGenerator().create(targetEntries.toArray()))

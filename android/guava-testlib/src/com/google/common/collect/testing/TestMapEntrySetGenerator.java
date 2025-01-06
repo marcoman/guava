@@ -16,12 +16,15 @@
 
 package com.google.common.collect.testing;
 
+import static java.lang.System.arraycopy;
+
 import com.google.common.annotations.GwtCompatible;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Creates map entries using sample keys and sample values.
@@ -29,7 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author Jesse Wilson
  */
 @GwtCompatible
-@ElementTypesAreNonnullByDefault
+@NullMarked
 public abstract class TestMapEntrySetGenerator<
         K extends @Nullable Object, V extends @Nullable Object>
     implements TestSetGenerator<Map.Entry<K, V>> {
@@ -49,7 +52,7 @@ public abstract class TestMapEntrySetGenerator<
   @Override
   public Set<Entry<K, V>> create(Object... elements) {
     Entry<K, V>[] entries = createArray(elements.length);
-    System.arraycopy(elements, 0, entries, 0, elements.length);
+    arraycopy(elements, 0, entries, 0, elements.length);
     return createFromEntries(entries);
   }
 

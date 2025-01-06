@@ -16,6 +16,7 @@
 
 package com.google.common.primitives;
 
+import static com.google.common.primitives.ReflectionFreeAssertThrows.assertThrows;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -31,7 +32,8 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import junit.framework.TestCase;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Unit test for {@link Booleans}.
@@ -39,7 +41,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author Kevin Bourrillion
  */
 @GwtCompatible(emulated = true)
-@ElementTypesAreNonnullByDefault
+@NullMarked
 public class BooleansTest extends TestCase {
   private static final boolean[] EMPTY = {};
   private static final boolean[] ARRAY_FALSE = {false};
@@ -68,6 +70,8 @@ public class BooleansTest extends TestCase {
     assertThat(Booleans.falseFirst().compare(true, false)).isGreaterThan(0);
   }
 
+  // We need to test that our method behaves like the JDK method.
+  @SuppressWarnings("InlineMeInliner")
   public void testCompare() {
     for (boolean x : VALUES) {
       for (boolean y : VALUES) {
@@ -170,17 +174,8 @@ public class BooleansTest extends TestCase {
   }
 
   public void testEnsureCapacity_fail() {
-    try {
-      Booleans.ensureCapacity(ARRAY_FALSE, -1, 1);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
-    try {
-      // notice that this should even fail when no growth was needed
-      Booleans.ensureCapacity(ARRAY_FALSE, 1, -1);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> Booleans.ensureCapacity(ARRAY_FALSE, -1, 1));
+    assertThrows(IllegalArgumentException.class, () -> Booleans.ensureCapacity(ARRAY_FALSE, 1, -1));
   }
 
   public void testJoin() {
@@ -512,11 +507,7 @@ public class BooleansTest extends TestCase {
 
   public void testToArray_withNull() {
     List<@Nullable Boolean> list = Arrays.asList(false, true, null);
-    try {
-      Booleans.toArray(list);
-      fail();
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(NullPointerException.class, () -> Booleans.toArray(list));
   }
 
   @SuppressWarnings({"CollectionIsEmptyTruth", "CollectionIsNotEmptyTruth"})
@@ -593,16 +584,8 @@ public class BooleansTest extends TestCase {
     List<Boolean> list = Booleans.asList(ARRAY_FALSE);
     assertThat(list.set(0, true)).isFalse();
     assertThat(list.set(0, false)).isTrue();
-    try {
-      list.set(0, null);
-      fail();
-    } catch (NullPointerException expected) {
-    }
-    try {
-      list.set(1, true);
-      fail();
-    } catch (IndexOutOfBoundsException expected) {
-    }
+    assertThrows(NullPointerException.class, () -> list.set(0, null));
+    assertThrows(IndexOutOfBoundsException.class, () -> list.set(1, true));
   }
 
   public void testAsListCanonicalValues() {

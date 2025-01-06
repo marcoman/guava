@@ -34,7 +34,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.RandomAccess;
-import javax.annotation.CheckForNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Static utility methods pertaining to {@code float} primitives, that are not already found in
@@ -47,7 +47,6 @@ import javax.annotation.CheckForNull;
  * @since 1.0
  */
 @GwtCompatible(emulated = true)
-@ElementTypesAreNonnullByDefault
 public final class Floats extends FloatsMethodsForWeb {
   private Floats() {}
 
@@ -244,6 +243,8 @@ public final class Floats extends FloatsMethodsForWeb {
    * <p>If {@code value} is within the range {@code [min..max]}, {@code value} is returned
    * unchanged. If {@code value} is less than {@code min}, {@code min} is returned, and if {@code
    * value} is greater than {@code max}, {@code max} is returned.
+   *
+   * <p><b>Java 21+ users:</b> Use {@code Math.clamp} instead.
    *
    * @param value the {@code float} value to constrain
    * @param min the lower bound (inclusive) of the range to constrain {@code value} to
@@ -609,13 +610,13 @@ public final class Floats extends FloatsMethodsForWeb {
     }
 
     @Override
-    public boolean contains(@CheckForNull Object target) {
+    public boolean contains(@Nullable Object target) {
       // Overridden to prevent a ton of boxing
       return (target instanceof Float) && Floats.indexOf(array, (Float) target, start, end) != -1;
     }
 
     @Override
-    public int indexOf(@CheckForNull Object target) {
+    public int indexOf(@Nullable Object target) {
       // Overridden to prevent a ton of boxing
       if (target instanceof Float) {
         int i = Floats.indexOf(array, (Float) target, start, end);
@@ -627,7 +628,7 @@ public final class Floats extends FloatsMethodsForWeb {
     }
 
     @Override
-    public int lastIndexOf(@CheckForNull Object target) {
+    public int lastIndexOf(@Nullable Object target) {
       // Overridden to prevent a ton of boxing
       if (target instanceof Float) {
         int i = Floats.lastIndexOf(array, (Float) target, start, end);
@@ -658,7 +659,7 @@ public final class Floats extends FloatsMethodsForWeb {
     }
 
     @Override
-    public boolean equals(@CheckForNull Object object) {
+    public boolean equals(@Nullable Object object) {
       if (object == this) {
         return true;
       }
@@ -722,8 +723,7 @@ public final class Floats extends FloatsMethodsForWeb {
    * @since 14.0
    */
   @GwtIncompatible // regular expressions
-  @CheckForNull
-  public static Float tryParse(String string) {
+  public static @Nullable Float tryParse(String string) {
     if (Doubles.FLOATING_POINT_PATTERN.matcher(string).matches()) {
       // TODO(lowasser): could be potentially optimized, but only with
       // extensive testing

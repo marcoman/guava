@@ -17,6 +17,8 @@ package com.google.common.collect;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkElementIndex;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Maps.immutableEntry;
+import static java.util.Collections.sort;
 
 import com.google.common.annotations.GwtIncompatible;
 import com.google.common.annotations.J2ktIncompatible;
@@ -28,7 +30,6 @@ import com.google.errorprone.annotations.DoNotMock;
 import java.io.InvalidObjectException;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -36,8 +37,7 @@ import java.util.NoSuchElementException;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collector;
-import javax.annotation.CheckForNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A {@link RangeMap} whose contents will never change, with many other important properties
@@ -47,7 +47,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @since 14.0
  */
 @GwtIncompatible // NavigableMap
-@ElementTypesAreNonnullByDefault
 public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K, V>, Serializable {
 
   private static final ImmutableRangeMap<Comparable<?>, Object> EMPTY =
@@ -125,7 +124,7 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
       checkNotNull(range);
       checkNotNull(value);
       checkArgument(!range.isEmpty(), "Range must not be empty, but was %s", range);
-      entries.add(Maps.immutableEntry(range, value));
+      entries.add(immutableEntry(range, value));
       return this;
     }
 
@@ -151,7 +150,7 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
      * @throws IllegalArgumentException if any two ranges inserted into this builder overlap
      */
     public ImmutableRangeMap<K, V> build() {
-      Collections.sort(entries, Range.<K>rangeLexOrdering().onKeys());
+      sort(entries, Range.<K>rangeLexOrdering().onKeys());
       ImmutableList.Builder<Range<K>> rangesBuilder = new ImmutableList.Builder<>(entries.size());
       ImmutableList.Builder<V> valuesBuilder = new ImmutableList.Builder<>(entries.size());
       for (int i = 0; i < entries.size(); i++) {
@@ -179,8 +178,7 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
   }
 
   @Override
-  @CheckForNull
-  public V get(K key) {
+  public @Nullable V get(K key) {
     int index =
         SortedLists.binarySearch(
             ranges,
@@ -197,8 +195,7 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
   }
 
   @Override
-  @CheckForNull
-  public Entry<Range<K>, V> getEntry(K key) {
+  public @Nullable Entry<Range<K>, V> getEntry(K key) {
     int index =
         SortedLists.binarySearch(
             ranges,
@@ -210,7 +207,7 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
       return null;
     } else {
       Range<K> range = ranges.get(index);
-      return range.contains(key) ? Maps.immutableEntry(range, values.get(index)) : null;
+      return range.contains(key) ? immutableEntry(range, values.get(index)) : null;
     }
   }
 
@@ -301,7 +298,7 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
   @DoNotCall("Always throws UnsupportedOperationException")
   public final void merge(
       Range<K> range,
-      @CheckForNull V value,
+      @Nullable V value,
       BiFunction<? super V, ? super @Nullable V, ? extends @Nullable V> remappingFunction) {
     throw new UnsupportedOperationException();
   }
@@ -409,7 +406,7 @@ public class ImmutableRangeMap<K extends Comparable<?>, V> implements RangeMap<K
   }
 
   @Override
-  public boolean equals(@CheckForNull Object o) {
+  public boolean equals(@Nullable Object o) {
     if (o instanceof RangeMap) {
       RangeMap<?, ?> rangeMap = (RangeMap<?, ?>) o;
       return asMapOfRanges().equals(rangeMap.asMapOfRanges());

@@ -45,7 +45,6 @@ import java.util.List;
  * @since 11.0
  */
 @GwtCompatible(emulated = true)
-@ElementTypesAreNonnullByDefault
 public final class BigIntegerMath {
   /**
    * Returns the smallest power of two greater than or equal to {@code x}. This is equivalent to
@@ -117,10 +116,8 @@ public final class BigIntegerMath {
         BigInteger x2 = x.pow(2);
         int logX2Floor = x2.bitLength() - 1;
         return (logX2Floor < 2 * logFloor + 1) ? logFloor : logFloor + 1;
-
-      default:
-        throw new AssertionError();
     }
+    throw new AssertionError();
   }
 
   /*
@@ -204,9 +201,8 @@ public final class BigIntegerMath {
         BigInteger x2 = x.pow(2);
         BigInteger halfPowerSquared = floorPow.pow(2).multiply(BigInteger.TEN);
         return (x2.compareTo(halfPowerSquared) <= 0) ? floorLog : floorLog + 1;
-      default:
-        throw new AssertionError();
     }
+    throw new AssertionError();
   }
 
   private static final double LN_10 = Math.log(10);
@@ -250,9 +246,8 @@ public final class BigIntegerMath {
          * halfSquare.
          */
         return (halfSquare.compareTo(x) >= 0) ? sqrtFloor : sqrtFloor.add(BigInteger.ONE);
-      default:
-        throw new AssertionError();
     }
+    throw new AssertionError();
   }
 
   @GwtIncompatible // TODO

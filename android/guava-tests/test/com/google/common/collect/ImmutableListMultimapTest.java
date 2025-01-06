@@ -16,10 +16,13 @@
 
 package com.google.common.collect;
 
+import static com.google.common.collect.ReflectionFreeAssertThrows.assertThrows;
 import static com.google.common.collect.testing.features.CollectionFeature.KNOWN_ORDER;
 import static com.google.common.collect.testing.features.CollectionFeature.SERIALIZABLE;
 import static com.google.common.collect.testing.features.MapFeature.ALLOWS_ANY_NULL_QUERIES;
 import static com.google.common.truth.Truth.assertThat;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
@@ -39,7 +42,8 @@ import java.util.Map.Entry;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Tests for {@link ImmutableListMultimap}.
@@ -47,8 +51,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author Jared Levy
  */
 @GwtCompatible(emulated = true)
-@ElementTypesAreNonnullByDefault
+@NullMarked
 public class ImmutableListMultimapTest extends TestCase {
+  @J2ktIncompatible
   public static class ImmutableListMultimapGenerator extends TestStringListMultimapGenerator {
     @Override
     protected ListMultimap<String, String> create(Entry<String, String>[] entries) {
@@ -60,6 +65,7 @@ public class ImmutableListMultimapTest extends TestCase {
     }
   }
 
+  @J2ktIncompatible
   public static class ImmutableListMultimapCopyOfEntriesGenerator
       extends TestStringListMultimapGenerator {
     @Override
@@ -87,11 +93,8 @@ public class ImmutableListMultimapTest extends TestCase {
   }
 
   public void testBuilderWithExpectedKeysNegative() {
-    try {
-      ImmutableListMultimap.builderWithExpectedKeys(-1);
-      fail("Expected IllegalArgumentException");
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(
+        IllegalArgumentException.class, () -> ImmutableListMultimap.builderWithExpectedKeys(-1));
   }
 
   public void testBuilderWithExpectedKeysZero() {
@@ -110,11 +113,7 @@ public class ImmutableListMultimapTest extends TestCase {
 
   public void testBuilderWithExpectedValuesPerKeyNegative() {
     ImmutableListMultimap.Builder<String, String> builder = ImmutableListMultimap.builder();
-    try {
-      builder.expectedValuesPerKey(-1);
-      fail("Expected IllegalArgumentException");
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> builder.expectedValuesPerKey(-1));
   }
 
   public void testBuilderWithExpectedValuesPerKeyZero() {
@@ -139,16 +138,10 @@ public class ImmutableListMultimapTest extends TestCase {
 
   public void testBuilder_withImmutableEntryAndNullContents() {
     Builder<String, Integer> builder = new Builder<>();
-    try {
-      builder.put(Maps.immutableEntry("one", (Integer) null));
-      fail();
-    } catch (NullPointerException expected) {
-    }
-    try {
-      builder.put(Maps.immutableEntry((String) null, 1));
-      fail();
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(
+        NullPointerException.class, () -> builder.put(Maps.immutableEntry("one", (Integer) null)));
+    assertThrows(
+        NullPointerException.class, () -> builder.put(Maps.immutableEntry((String) null, 1)));
   }
 
   private static class StringHolder {
@@ -183,8 +176,8 @@ public class ImmutableListMultimapTest extends TestCase {
     builder.putAll("bar", Arrays.asList(4, 5));
     builder.putAll("foo", Arrays.asList(6, 7));
     Multimap<String, Integer> multimap = builder.build();
-    assertEquals(Arrays.asList(1, 2, 3, 6, 7), multimap.get("foo"));
-    assertEquals(Arrays.asList(4, 5), multimap.get("bar"));
+    assertThat(multimap.get("foo")).containsExactly(1, 2, 3, 6, 7).inOrder();
+    assertThat(multimap.get("bar")).containsExactly(4, 5).inOrder();
     assertEquals(7, multimap.size());
   }
 
@@ -193,9 +186,9 @@ public class ImmutableListMultimapTest extends TestCase {
     builder.putAll("foo", 1, 2, 3);
     builder.putAll("bar", 4, 5);
     builder.putAll("foo", 6, 7);
-    Multimap<String, Integer> multimap = builder.build();
-    assertEquals(Arrays.asList(1, 2, 3, 6, 7), multimap.get("foo"));
-    assertEquals(Arrays.asList(4, 5), multimap.get("bar"));
+    ImmutableListMultimap<String, Integer> multimap = builder.build();
+    assertThat(multimap.get("foo")).containsExactly(1, 2, 3, 6, 7).inOrder();
+    assertThat(multimap.get("bar")).containsExactly(4, 5).inOrder();
     assertEquals(7, multimap.size());
   }
 
@@ -212,9 +205,9 @@ public class ImmutableListMultimapTest extends TestCase {
     ImmutableListMultimap.Builder<String, Integer> builder = ImmutableListMultimap.builder();
     builder.putAll(toPut);
     builder.putAll(moreToPut);
-    Multimap<String, Integer> multimap = builder.build();
-    assertEquals(Arrays.asList(1, 2, 3, 6, 7), multimap.get("foo"));
-    assertEquals(Arrays.asList(4, 5), multimap.get("bar"));
+    ImmutableListMultimap<String, Integer> multimap = builder.build();
+    assertThat(multimap.get("foo")).containsExactly(1, 2, 3, 6, 7).inOrder();
+    assertThat(multimap.get("bar")).containsExactly(4, 5).inOrder();
     assertEquals(7, multimap.size());
   }
 
@@ -255,9 +248,9 @@ public class ImmutableListMultimapTest extends TestCase {
     ImmutableListMultimap.Builder<String, Integer> builder = ImmutableListMultimap.builder();
     builder.putAll(toPut);
     builder.putAll(moreToPut);
-    Multimap<String, Integer> multimap = builder.build();
-    assertEquals(Arrays.asList(1, 2, 1, 6, 7, 2), multimap.get("foo"));
-    assertEquals(Arrays.asList(4, 5, 4), multimap.get("bar"));
+    ImmutableListMultimap<String, Integer> multimap = builder.build();
+    assertThat(multimap.get("foo")).containsExactly(1, 2, 1, 6, 7, 2).inOrder();
+    assertThat(multimap.get("bar")).containsExactly(4, 5, 4).inOrder();
     assertEquals(9, multimap.size());
   }
 
@@ -265,52 +258,23 @@ public class ImmutableListMultimapTest extends TestCase {
     Multimap<@Nullable String, Integer> toPut = LinkedListMultimap.create();
     toPut.put(null, 1);
     ImmutableListMultimap.Builder<String, Integer> builder = ImmutableListMultimap.builder();
-    try {
-      builder.put(null, 1);
-      fail();
-    } catch (NullPointerException expected) {
-    }
-    try {
-      builder.putAll(null, Arrays.asList(1, 2, 3));
-      fail();
-    } catch (NullPointerException expected) {
-    }
-    try {
-      builder.putAll(null, 1, 2, 3);
-      fail();
-    } catch (NullPointerException expected) {
-    }
-    try {
-      builder.putAll((Multimap<String, Integer>) toPut);
-      fail();
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(NullPointerException.class, () -> builder.put(null, 1));
+    assertThrows(NullPointerException.class, () -> builder.putAll(null, Arrays.asList(1, 2, 3)));
+    assertThrows(NullPointerException.class, () -> builder.putAll(null, 1, 2, 3));
+    assertThrows(
+        NullPointerException.class, () -> builder.putAll((Multimap<String, Integer>) toPut));
   }
 
   public void testBuilderPutNullValue() {
     Multimap<String, @Nullable Integer> toPut = LinkedListMultimap.create();
     toPut.put("foo", null);
     ImmutableListMultimap.Builder<String, Integer> builder = ImmutableListMultimap.builder();
-    try {
-      builder.put("foo", null);
-      fail();
-    } catch (NullPointerException expected) {
-    }
-    try {
-      builder.putAll("foo", Arrays.asList(1, null, 3));
-      fail();
-    } catch (NullPointerException expected) {
-    }
-    try {
-      builder.putAll("foo", 1, null, 3);
-      fail();
-    } catch (NullPointerException expected) {
-    }
-    try {
-      builder.putAll((Multimap<String, Integer>) toPut);
-      fail();
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(NullPointerException.class, () -> builder.put("foo", null));
+    assertThrows(
+        NullPointerException.class, () -> builder.putAll("foo", Arrays.asList(1, null, 3)));
+    assertThrows(NullPointerException.class, () -> builder.putAll("foo", 1, null, 3));
+    assertThrows(
+        NullPointerException.class, () -> builder.putAll((Multimap<String, Integer>) toPut));
   }
 
   public void testBuilderOrderKeysBy() {
@@ -389,9 +353,8 @@ public class ImmutableListMultimapTest extends TestCase {
     input.put("foo", 1);
     input.put("bar", 2);
     input.put("foo", 3);
-    Multimap<String, Integer> multimap = ImmutableListMultimap.copyOf(input);
-    assertEquals(multimap, input);
-    assertEquals(input, multimap);
+    ImmutableListMultimap<String, Integer> multimap = ImmutableListMultimap.copyOf(input);
+    new EqualsTester().addEqualityGroup(input, multimap).testEquals();
   }
 
   public void testCopyOfWithDuplicates() {
@@ -400,16 +363,14 @@ public class ImmutableListMultimapTest extends TestCase {
     input.put("bar", 2);
     input.put("foo", 3);
     input.put("foo", 1);
-    Multimap<String, Integer> multimap = ImmutableListMultimap.copyOf(input);
-    assertEquals(multimap, input);
-    assertEquals(input, multimap);
+    ImmutableListMultimap<String, Integer> multimap = ImmutableListMultimap.copyOf(input);
+    new EqualsTester().addEqualityGroup(input, multimap).testEquals();
   }
 
   public void testCopyOfEmpty() {
     ArrayListMultimap<String, Integer> input = ArrayListMultimap.create();
-    Multimap<String, Integer> multimap = ImmutableListMultimap.copyOf(input);
-    assertEquals(multimap, input);
-    assertEquals(input, multimap);
+    ImmutableListMultimap<String, Integer> multimap = ImmutableListMultimap.copyOf(input);
+    new EqualsTester().addEqualityGroup(input, multimap).testEquals();
   }
 
   public void testCopyOfImmutableListMultimap() {
@@ -420,21 +381,17 @@ public class ImmutableListMultimapTest extends TestCase {
   public void testCopyOfNullKey() {
     ArrayListMultimap<@Nullable String, Integer> input = ArrayListMultimap.create();
     input.put(null, 1);
-    try {
-      ImmutableListMultimap.copyOf((ArrayListMultimap<String, Integer>) input);
-      fail();
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(
+        NullPointerException.class,
+        () -> ImmutableListMultimap.copyOf((ArrayListMultimap<String, Integer>) input));
   }
 
   public void testCopyOfNullValue() {
     ArrayListMultimap<String, @Nullable Integer> input = ArrayListMultimap.create();
     input.putAll("foo", Arrays.<@Nullable Integer>asList(1, null, 3));
-    try {
-      ImmutableListMultimap.copyOf((ArrayListMultimap<String, Integer>) input);
-      fail();
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(
+        NullPointerException.class,
+        () -> ImmutableListMultimap.copyOf((ArrayListMultimap<String, Integer>) input));
   }
 
   // TODO(b/172823566): Use mainline testToImmutableListMultimap once CollectorTester is usable.
@@ -452,17 +409,17 @@ public class ImmutableListMultimapTest extends TestCase {
   }
 
   public void testEmptyMultimapReads() {
-    Multimap<String, Integer> multimap = ImmutableListMultimap.of();
+    ImmutableListMultimap<String, Integer> multimap = ImmutableListMultimap.of();
     assertFalse(multimap.containsKey("foo"));
     assertFalse(multimap.containsValue(1));
     assertFalse(multimap.containsEntry("foo", 1));
     assertTrue(multimap.entries().isEmpty());
     assertTrue(multimap.equals(ArrayListMultimap.create()));
-    assertEquals(Collections.emptyList(), multimap.get("foo"));
+    assertEquals(emptyList(), multimap.get("foo"));
     assertEquals(0, multimap.hashCode());
     assertTrue(multimap.isEmpty());
     assertEquals(HashMultiset.create(), multimap.keys());
-    assertEquals(Collections.emptySet(), multimap.keySet());
+    assertEquals(emptySet(), multimap.keySet());
     assertEquals(0, multimap.size());
     assertTrue(multimap.values().isEmpty());
     assertEquals("{}", multimap.toString());

@@ -16,6 +16,7 @@
 
 package com.google.common.primitives;
 
+import static com.google.common.primitives.ReflectionFreeAssertThrows.assertThrows;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.annotations.GwtCompatible;
@@ -28,14 +29,15 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import junit.framework.TestCase;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Unit test for {@link Bytes}.
  *
  * @author Kevin Bourrillion
  */
-@ElementTypesAreNonnullByDefault
+@NullMarked
 @GwtCompatible(emulated = true)
 public class BytesTest extends TestCase {
   private static final byte[] EMPTY = {};
@@ -171,17 +173,8 @@ public class BytesTest extends TestCase {
   }
 
   public void testEnsureCapacity_fail() {
-    try {
-      Bytes.ensureCapacity(ARRAY1, -1, 1);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
-    try {
-      // notice that this should even fail when no growth was needed
-      Bytes.ensureCapacity(ARRAY1, 1, -1);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> Bytes.ensureCapacity(ARRAY1, -1, 1));
+    assertThrows(IllegalArgumentException.class, () -> Bytes.ensureCapacity(ARRAY1, 1, -1));
   }
 
   public void testToArray() {
@@ -217,11 +210,7 @@ public class BytesTest extends TestCase {
 
   public void testToArray_withNull() {
     List<@Nullable Byte> list = Arrays.asList((byte) 0, (byte) 1, null);
-    try {
-      Bytes.toArray(list);
-      fail();
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(NullPointerException.class, () -> Bytes.toArray(list));
   }
 
   public void testToArray_withConversion() {

@@ -16,7 +16,7 @@ package com.google.common.hash;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Throwables.throwIfUnchecked;
+import static com.google.common.hash.SneakyThrows.sneakyThrow;
 import static java.lang.invoke.MethodType.methodType;
 
 import com.google.errorprone.annotations.Immutable;
@@ -32,8 +32,8 @@ import java.util.List;
 import java.util.zip.Adler32;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
-import javax.annotation.CheckForNull;
 import javax.crypto.spec.SecretKeySpec;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Static methods to obtain {@link HashFunction} instances, and other static hashing-related
@@ -47,7 +47,6 @@ import javax.crypto.spec.SecretKeySpec;
  * @author Kurt Alfred Kluever
  * @since 11.0
  */
-@ElementTypesAreNonnullByDefault
 public final class Hashing {
   /**
    * Returns a general-purpose, <b>temporary-use</b>, non-cryptographic hash function. The algorithm
@@ -110,6 +109,7 @@ public final class Hashing {
    *     #murmur3_32_fixed(int)} instead.
    */
   @Deprecated
+  @SuppressWarnings("IdentifierName") // the best we could do for adjacent digit blocks
   public static HashFunction murmur3_32(int seed) {
     return new Murmur3_32HashFunction(seed, /* supplementaryPlaneFix= */ false);
   }
@@ -128,6 +128,7 @@ public final class Hashing {
    *     #murmur3_32_fixed()} instead.
    */
   @Deprecated
+  @SuppressWarnings("IdentifierName") // the best we could do for adjacent digit blocks
   public static HashFunction murmur3_32() {
     return Murmur3_32HashFunction.MURMUR3_32;
   }
@@ -144,6 +145,7 @@ public final class Hashing {
    *
    * @since 31.0
    */
+  @SuppressWarnings("IdentifierName") // the best we could do for adjacent digit blocks
   public static HashFunction murmur3_32_fixed(int seed) {
     return new Murmur3_32HashFunction(seed, /* supplementaryPlaneFix= */ true);
   }
@@ -160,6 +162,7 @@ public final class Hashing {
    *
    * @since 31.0
    */
+  @SuppressWarnings("IdentifierName") // the best we could do for adjacent digit blocks
   public static HashFunction murmur3_32_fixed() {
     return Murmur3_32HashFunction.MURMUR3_32_FIXED;
   }
@@ -171,6 +174,7 @@ public final class Hashing {
    *
    * <p>The exact C++ equivalent is the MurmurHash3_x64_128 function (Murmur3F).
    */
+  @SuppressWarnings("IdentifierName") // the best we could do for adjacent digit blocks
   public static HashFunction murmur3_128(int seed) {
     return new Murmur3_128HashFunction(seed);
   }
@@ -182,6 +186,7 @@ public final class Hashing {
    *
    * <p>The exact C++ equivalent is the MurmurHash3_x64_128 function (Murmur3F).
    */
+  @SuppressWarnings("IdentifierName") // the best we could do for adjacent digit blocks
   public static HashFunction murmur3_128() {
     return Murmur3_128HashFunction.MURMUR3_128;
   }
@@ -519,9 +524,8 @@ public final class Hashing {
       try {
         return (Checksum) CONSTRUCTOR.invokeExact();
       } catch (Throwable e) {
-        throwIfUnchecked(e);
-        // That constructor has no `throws` clause.
-        throw newLinkageError(e);
+        // The constructor has no `throws` clause.
+        throw sneakyThrow(e);
       }
     }
 
@@ -812,7 +816,7 @@ public final class Hashing {
     }
 
     @Override
-    public boolean equals(@CheckForNull Object object) {
+    public boolean equals(@Nullable Object object) {
       if (object instanceof ConcatenatedHashFunction) {
         ConcatenatedHashFunction other = (ConcatenatedHashFunction) object;
         return Arrays.equals(functions, other.functions);

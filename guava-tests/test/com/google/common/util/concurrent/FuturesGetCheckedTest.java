@@ -47,11 +47,12 @@ import java.lang.ref.WeakReference;
 import java.net.URLClassLoader;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import junit.framework.TestCase;
+import org.jspecify.annotations.NullUnmarked;
 
 /** Unit tests for {@link Futures#getChecked(Future, Class)}. */
+@NullUnmarked
 public class FuturesGetCheckedTest extends TestCase {
   // Boring untimed-get tests:
 
@@ -257,9 +258,7 @@ public class FuturesGetCheckedTest extends TestCase {
       throws Exception {
     assertThrows(
         IllegalArgumentException.class,
-        () ->
-            getChecked(
-                immediateFuture("x"), ExceptionWithBadConstructor.class, 1, TimeUnit.SECONDS));
+        () -> getChecked(immediateFuture("x"), ExceptionWithBadConstructor.class, 1, SECONDS));
   }
 
   public void testGetCheckedTimed_badExceptionConstructor_wrapsOriginalChecked() throws Exception {
@@ -267,10 +266,7 @@ public class FuturesGetCheckedTest extends TestCase {
         IllegalArgumentException.class,
         () ->
             getChecked(
-                FAILED_FUTURE_CHECKED_EXCEPTION,
-                ExceptionWithBadConstructor.class,
-                1,
-                TimeUnit.SECONDS));
+                FAILED_FUTURE_CHECKED_EXCEPTION, ExceptionWithBadConstructor.class, 1, SECONDS));
   }
 
   public void testGetCheckedTimed_withGoodAndBadExceptionConstructor() {
@@ -282,7 +278,7 @@ public class FuturesGetCheckedTest extends TestCase {
                     FAILED_FUTURE_CHECKED_EXCEPTION,
                     ExceptionWithGoodAndBadConstructor.class,
                     1,
-                    TimeUnit.SECONDS));
+                    SECONDS));
     assertThat(expected).hasCauseThat().isSameInstanceAs(CHECKED_EXCEPTION);
   }
 

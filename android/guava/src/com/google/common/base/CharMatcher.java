@@ -21,6 +21,8 @@ import static com.google.common.base.Preconditions.checkPositionIndex;
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
 import com.google.common.annotations.VisibleForTesting;
+import com.google.errorprone.annotations.InlineMe;
+import com.google.errorprone.annotations.InlineMeValidationDisabled;
 import java.util.Arrays;
 import java.util.BitSet;
 
@@ -61,7 +63,6 @@ import java.util.BitSet;
  * @since 1.0
  */
 @GwtCompatible(emulated = true)
-@ElementTypesAreNonnullByDefault
 public abstract class CharMatcher implements Predicate<Character> {
   /*
    *           N777777777NO
@@ -368,7 +369,8 @@ public abstract class CharMatcher implements Predicate<Character> {
   // Non-static factories
 
   /** Returns a matcher that matches any character not matched by this matcher. */
-  // @Override under Java 8 but not under Java 7
+  // This is not an override in java7, where Guava's Predicate does not extend the JDK's Predicate.
+  @SuppressWarnings("MissingOverride")
   public CharMatcher negate() {
     return new Negated(this);
   }
@@ -905,8 +907,16 @@ public abstract class CharMatcher implements Predicate<Character> {
    * @deprecated Provided only to satisfy the {@link Predicate} interface; use {@link #matches}
    *     instead.
    */
+  @InlineMe(replacement = "this.matches(character)")
   @Deprecated
   @Override
+  /*
+   * We can't compatibly make this `final` now (even after devising a way for `ForPredicate`, which
+   * currently overrides it, to keep the null check that it inserts).
+   */
+  @InlineMeValidationDisabled(
+      "While apply() is not final, the inlining is still safe because all known overrides of"
+          + " apply() call matches().")
   public boolean apply(Character character) {
     return matches(character);
   }

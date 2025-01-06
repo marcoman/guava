@@ -14,6 +14,8 @@
 
 package com.google.common.collect;
 
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
+
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
 import com.google.common.annotations.J2ktIncompatible;
@@ -33,7 +35,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Static utility methods pertaining to {@link Queue} and {@link Deque} instances. Also see this
@@ -43,7 +45,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @since 11.0
  */
 @GwtCompatible(emulated = true)
-@ElementTypesAreNonnullByDefault
 public final class Queues {
   private Queues() {}
 
@@ -285,7 +286,7 @@ public final class Queues {
    * @param timeout how long to wait before giving up
    * @return the number of elements transferred
    * @throws InterruptedException if interrupted while waiting
-   * @since 28.0
+   * @since 28.0 (but only since 33.4.0 in the Android flavor)
    */
   @CanIgnoreReturnValue
   @J2ktIncompatible
@@ -294,7 +295,7 @@ public final class Queues {
       BlockingQueue<E> q, Collection<? super E> buffer, int numElements, Duration timeout)
       throws InterruptedException {
     // TODO(b/126049426): Consider using saturateToNanos(timeout) instead.
-    return drain(q, buffer, numElements, timeout.toNanos(), TimeUnit.NANOSECONDS);
+    return drain(q, buffer, numElements, timeout.toNanos(), NANOSECONDS);
   }
 
   /**
@@ -333,7 +334,7 @@ public final class Queues {
       // elements already available (e.g. LinkedBlockingQueue#drainTo locks only once)
       added += q.drainTo(buffer, numElements - added);
       if (added < numElements) { // not enough elements immediately available; will have to poll
-        E e = q.poll(deadline - System.nanoTime(), TimeUnit.NANOSECONDS);
+        E e = q.poll(deadline - System.nanoTime(), NANOSECONDS);
         if (e == null) {
           break; // we already waited enough, and there are no more elements in sight
         }
@@ -355,7 +356,7 @@ public final class Queues {
    * @param numElements the number of elements to be waited for
    * @param timeout how long to wait before giving up
    * @return the number of elements transferred
-   * @since 28.0
+   * @since 28.0 (but only since 33.4.0 in the Android flavor)
    */
   @CanIgnoreReturnValue
   @J2ktIncompatible
@@ -363,7 +364,7 @@ public final class Queues {
   public static <E> int drainUninterruptibly(
       BlockingQueue<E> q, Collection<? super E> buffer, int numElements, Duration timeout) {
     // TODO(b/126049426): Consider using saturateToNanos(timeout) instead.
-    return drainUninterruptibly(q, buffer, numElements, timeout.toNanos(), TimeUnit.NANOSECONDS);
+    return drainUninterruptibly(q, buffer, numElements, timeout.toNanos(), NANOSECONDS);
   }
 
   /**
@@ -402,7 +403,7 @@ public final class Queues {
           E e; // written exactly once, by a successful (uninterrupted) invocation of #poll
           while (true) {
             try {
-              e = q.poll(deadline - System.nanoTime(), TimeUnit.NANOSECONDS);
+              e = q.poll(deadline - System.nanoTime(), NANOSECONDS);
               break;
             } catch (InterruptedException ex) {
               interrupted = true; // note interruption and retry

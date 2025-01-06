@@ -38,8 +38,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Spliterator;
 import java.util.Spliterators;
-import javax.annotation.CheckForNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A {@link Collection} whose contents will never change, and which offers a few additional
@@ -169,7 +168,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 @DoNotMock("Use ImmutableList.of or another implementation")
 @GwtCompatible(emulated = true)
 @SuppressWarnings("serial") // we're overriding default serialization
-@ElementTypesAreNonnullByDefault
 // TODO(kevinb): I think we should push everything down to "BaseImmutableCollection" or something,
 // just to do everything we can to emphasize the "practically an interface" nature of this class.
 public abstract class ImmutableCollection<E> extends AbstractCollection<E> implements Serializable {
@@ -178,7 +176,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E> imple
    * These are properties of the collection as a whole; SIZED and SUBSIZED are more properties of
    * the spliterator implementation.
    */
-  @SuppressWarnings({"AndroidJdkLibsChecker", "Java7ApiChecker"})
+  @SuppressWarnings("Java7ApiChecker")
   // @IgnoreJRERequirement is not necessary because this compiles down to a constant.
   // (which is fortunate because Animal Sniffer doesn't look for @IgnoreJRERequirement on fields)
   static final int SPLITERATOR_CHARACTERISTICS =
@@ -191,7 +189,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E> imple
   public abstract UnmodifiableIterator<E> iterator();
 
   @Override
-  @SuppressWarnings({"AndroidJdkLibsChecker", "Java7ApiChecker"})
+  @SuppressWarnings("Java7ApiChecker")
   @IgnoreJRERequirement // used only from APIs with Java 8 types in them
   // (not used within guava-android as of this writing, but we include it in the jar as a test)
   public Spliterator<E> spliterator() {
@@ -239,9 +237,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E> imple
   }
 
   /** If this collection is backed by an array of its elements in insertion order, returns it. */
-  @CheckForNull
-  @Nullable
-  Object[] internalArray() {
+  @Nullable Object @Nullable [] internalArray() {
     return null;
   }
 
@@ -262,7 +258,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E> imple
   }
 
   @Override
-  public abstract boolean contains(@CheckForNull Object object);
+  public abstract boolean contains(@Nullable Object object);
 
   /**
    * Guaranteed to throw an exception and leave the collection unmodified.
@@ -288,7 +284,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E> imple
   @Deprecated
   @Override
   @DoNotCall("Always throws UnsupportedOperationException")
-  public final boolean remove(@CheckForNull Object object) {
+  public final boolean remove(@Nullable Object object) {
     throw new UnsupportedOperationException();
   }
 
@@ -404,7 +400,7 @@ public abstract class ImmutableCollection<E> extends AbstractCollection<E> imple
 
     static int expandedCapacity(int oldCapacity, int minCapacity) {
       if (minCapacity < 0) {
-        throw new IllegalArgumentException("cannot store more than MAX_VALUE elements");
+        throw new IllegalArgumentException("cannot store more than Integer.MAX_VALUE elements");
       } else if (minCapacity <= oldCapacity) {
         return oldCapacity;
       }

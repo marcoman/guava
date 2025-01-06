@@ -16,6 +16,7 @@ package com.google.common.hash;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.hash.SneakyThrows.sneakyThrow;
 
 import com.google.errorprone.annotations.Immutable;
 import com.google.j2objc.annotations.J2ObjCIncompatible;
@@ -25,7 +26,7 @@ import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.nio.ByteBuffer;
 import java.util.zip.Checksum;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * {@link HashFunction} adapter for {@link Checksum} instances.
@@ -33,7 +34,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author Colin Decker
  */
 @Immutable
-@ElementTypesAreNonnullByDefault
 final class ChecksumHashFunction extends AbstractHashFunction implements Serializable {
   private final ImmutableSupplier<? extends Checksum> checksumSupplier;
   private final int bits;
@@ -114,10 +114,9 @@ final class ChecksumHashFunction extends AbstractHashFunction implements Seriali
       if (UPDATE_BB != null) {
         try {
           UPDATE_BB.invokeExact(cs, bb);
-        } catch (Error t) {
-          throw t;
-        } catch (Throwable t) {
-          throw new AssertionError(t);
+        } catch (Throwable e) {
+          // `update` has no `throws` clause.
+          sneakyThrow(e);
         }
         return true;
       } else {

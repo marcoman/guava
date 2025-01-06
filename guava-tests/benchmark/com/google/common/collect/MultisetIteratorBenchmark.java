@@ -16,17 +16,21 @@
 
 package com.google.common.collect;
 
+import static java.lang.Math.min;
+
 import com.google.caliper.BeforeExperiment;
 import com.google.caliper.Benchmark;
 import com.google.caliper.Param;
 import com.google.common.base.Preconditions;
 import java.util.Random;
+import org.jspecify.annotations.NullUnmarked;
 
 /**
  * Tests the speed of iteration of different iteration methods for collections.
  *
  * @author David Richter
  */
+@NullUnmarked
 public class MultisetIteratorBenchmark {
   @Param({"0", "1", "16", "256", "4096", "65536"})
   int size;
@@ -51,7 +55,7 @@ public class MultisetIteratorBenchmark {
     while (sizeRemaining > 0) {
       // The JVM will return interned values for small ints.
       Integer value = random.nextInt(1000) + 128;
-      int count = Math.min(random.nextInt(10) + 1, sizeRemaining);
+      int count = min(random.nextInt(10) + 1, sizeRemaining);
       sizeRemaining -= count;
       hashMultiset.add(value, count);
       linkedHashMultiset.add(value, count);

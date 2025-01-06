@@ -19,12 +19,15 @@ package com.google.common.util.concurrent;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.Futures.addCallback;
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
+import static com.google.common.util.concurrent.ReflectionFreeAssertThrows.assertThrows;
 
 import com.google.common.annotations.GwtCompatible;
+import com.google.common.util.concurrent.TestExceptions.SomeError;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.Executor;
 import junit.framework.TestCase;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Test for {@link FutureCallback}.
@@ -32,6 +35,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author Anthony Zana
  */
 @GwtCompatible
+@NullUnmarked
 public class FutureCallbackTest extends TestCase {
   public void testSameThreadSuccess() {
     SettableFuture<String> f = SettableFuture.create();
@@ -124,8 +128,7 @@ public class FutureCallbackTest extends TestCase {
   }
 
   public void testOnSuccessThrowsError() throws Exception {
-    class TestError extends Error {}
-    TestError error = new TestError();
+    SomeError error = new SomeError();
     String result = "result";
     SettableFuture<String> future = SettableFuture.create();
     int[] successCalls = new int[1];
@@ -144,12 +147,8 @@ public class FutureCallbackTest extends TestCase {
           }
         };
     addCallback(future, callback, directExecutor());
-    try {
-      future.set(result);
-      fail("Should have thrown");
-    } catch (TestError e) {
-      assertSame(error, e);
-    }
+    SomeError e = assertThrows(SomeError.class, () -> future.set(result));
+    assertSame(error, e);
     assertEquals(result, future.get());
     assertThat(successCalls[0]).isEqualTo(1);
     assertThat(failureCalls[0]).isEqualTo(0);
@@ -158,10 +157,10 @@ public class FutureCallbackTest extends TestCase {
   public void testWildcardFuture() {
     SettableFuture<String> settable = SettableFuture.create();
     ListenableFuture<?> f = settable;
-    FutureCallback<Object> callback =
-        new FutureCallback<Object>() {
+    FutureCallback<@Nullable Object> callback =
+        new FutureCallback<@Nullable Object>() {
           @Override
-          public void onSuccess(Object result) {}
+          public void onSuccess(@Nullable Object result) {}
 
           @Override
           public void onFailure(Throwable t) {}

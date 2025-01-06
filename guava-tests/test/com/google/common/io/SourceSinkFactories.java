@@ -21,6 +21,7 @@ import static com.google.common.io.SourceSinkFactory.ByteSinkFactory;
 import static com.google.common.io.SourceSinkFactory.ByteSourceFactory;
 import static com.google.common.io.SourceSinkFactory.CharSinkFactory;
 import static com.google.common.io.SourceSinkFactory.CharSourceFactory;
+import static java.lang.Math.min;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.ByteArrayOutputStream;
@@ -40,13 +41,15 @@ import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * {@link SourceSinkFactory} implementations.
  *
  * @author Colin Decker
  */
+@NullUnmarked
 public class SourceSinkFactories {
 
   private SourceSinkFactories() {}
@@ -215,8 +218,8 @@ public class SourceSinkFactories {
       @Override
       public byte[] getExpected(byte[] bytes) {
         byte[] baseExpected = factory.getExpected(bytes);
-        int startOffset = (int) Math.min(off, baseExpected.length);
-        int actualLen = (int) Math.min(len, baseExpected.length - startOffset);
+        int startOffset = (int) min(off, baseExpected.length);
+        int actualLen = (int) min(len, baseExpected.length - startOffset);
         return Arrays.copyOfRange(baseExpected, startOffset, startOffset + actualLen);
       }
 

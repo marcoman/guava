@@ -16,6 +16,7 @@
 
 package com.google.common.testing;
 
+import static java.lang.Math.max;
 import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.google.common.annotations.GwtIncompatible;
@@ -29,6 +30,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * Testing utilities relating to garbage collection finalization.
@@ -106,7 +108,7 @@ import java.util.concurrent.TimeoutException;
 @GwtIncompatible
 @J2ktIncompatible
 @J2ObjCIncompatible // gc
-@ElementTypesAreNonnullByDefault
+@NullMarked
 public final class GcFinalization {
   private GcFinalization() {}
 
@@ -126,7 +128,7 @@ public final class GcFinalization {
     //
     // TODO(user): Consider scaling by number of mutator threads,
     // e.g. using Thread#activeCount()
-    return Math.max(10L, Runtime.getRuntime().totalMemory() / (32L * 1024L * 1024L));
+    return max(10L, Runtime.getRuntime().totalMemory() / (32L * 1024L * 1024L));
   }
 
   /**

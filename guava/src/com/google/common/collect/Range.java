@@ -23,12 +23,13 @@ import com.google.common.annotations.GwtCompatible;
 import com.google.common.base.Equivalence;
 import com.google.common.base.Predicate;
 import com.google.errorprone.annotations.Immutable;
+import com.google.errorprone.annotations.InlineMe;
 import java.io.Serializable;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.SortedSet;
-import javax.annotation.CheckForNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A range (or "interval") defines the <i>boundaries</i> around a contiguous span of values of some
@@ -120,7 +121,6 @@ import javax.annotation.CheckForNull;
 @GwtCompatible
 @SuppressWarnings("rawtypes") // https://github.com/google/guava/issues/989
 @Immutable(containerOf = "C")
-@ElementTypesAreNonnullByDefault
 public final class Range<C extends Comparable> extends RangeGwtSerializationDependencies
     implements Predicate<C>, Serializable {
   @SuppressWarnings("unchecked")
@@ -231,9 +231,8 @@ public final class Range<C extends Comparable> extends RangeGwtSerializationDepe
         return lessThan(endpoint);
       case CLOSED:
         return atMost(endpoint);
-      default:
-        throw new AssertionError();
     }
+    throw new AssertionError();
   }
 
   /**
@@ -266,9 +265,8 @@ public final class Range<C extends Comparable> extends RangeGwtSerializationDepe
         return greaterThan(endpoint);
       case CLOSED:
         return atLeast(endpoint);
-      default:
-        throw new AssertionError();
     }
+    throw new AssertionError();
   }
 
   private static final Range<Comparable> ALL = new Range<>(Cut.belowAll(), Cut.aboveAll());
@@ -415,6 +413,7 @@ public final class Range<C extends Comparable> extends RangeGwtSerializationDepe
    * @deprecated Provided only to satisfy the {@link Predicate} interface; use {@link #contains}
    *     instead.
    */
+  @InlineMe(replacement = "this.contains(input)")
   @Deprecated
   @Override
   public boolean apply(C input) {
@@ -648,7 +647,7 @@ public final class Range<C extends Comparable> extends RangeGwtSerializationDepe
    * {@code [3..3)}, {@code (3..3]}, {@code (4..4]} are all unequal.
    */
   @Override
-  public boolean equals(@CheckForNull Object object) {
+  public boolean equals(@Nullable Object object) {
     if (object instanceof Range) {
       Range<?> other = (Range<?>) object;
       return lowerBound.equals(other.lowerBound) && upperBound.equals(other.upperBound);

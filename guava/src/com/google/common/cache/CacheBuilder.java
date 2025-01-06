@@ -17,6 +17,7 @@ package com.google.common.cache;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
@@ -40,7 +41,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.annotation.CheckForNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A builder of {@link LoadingCache} and {@link Cache} instances.
@@ -50,9 +51,9 @@ import javax.annotation.CheckForNull;
  *
  * <p>The successor to Guava's caching API is <a
  * href="https://github.com/ben-manes/caffeine/wiki">Caffeine</a>. Its API is designed to make it a
- * nearly drop-in replacement. It requires Java 8+, and is not available for Android or GWT/J2CL,
- * and may have <a href="https://github.com/ben-manes/caffeine/wiki/Guava">different (usually
- * better) behavior</a> when multiple threads attempt concurrent mutations. Its equivalent to {@code
+ * nearly drop-in replacement. Note that it is not available for Android or GWT/J2CL and that it may
+ * have <a href="https://github.com/ben-manes/caffeine/wiki/Guava">different (usually better)
+ * behavior</a> when multiple threads attempt concurrent mutations. Its equivalent to {@code
  * CacheBuilder} is its <a
  * href="https://www.javadoc.io/doc/com.github.ben-manes.caffeine/caffeine/latest/com.github.benmanes.caffeine/com/github/benmanes/caffeine/cache/Caffeine.html">{@code
  * Caffeine}</a> class. Caffeine offers better performance, more features (including asynchronous
@@ -181,17 +182,16 @@ import javax.annotation.CheckForNull;
  * explanation.
  *
  * @param <K> the most general key type this builder will be able to create caches for. This is
- *     normally {@code Object} unless it is constrained by using a method like {@code
+ *     normally {@code Object} unless it is constrained by using a method like {@link
  *     #removalListener}. Cache keys may not be null.
  * @param <V> the most general value type this builder will be able to create caches for. This is
- *     normally {@code Object} unless it is constrained by using a method like {@code
+ *     normally {@code Object} unless it is constrained by using a method like {@link
  *     #removalListener}. Cache values may not be null.
  * @author Charles Fry
  * @author Kevin Bourrillion
  * @since 10.0
  */
 @GwtCompatible(emulated = true)
-@ElementTypesAreNonnullByDefault
 public final class CacheBuilder<K, V> {
   private static final int DEFAULT_INITIAL_CAPACITY = 16;
   private static final int DEFAULT_CONCURRENCY_LEVEL = 4;
@@ -286,10 +286,10 @@ public final class CacheBuilder<K, V> {
   int concurrencyLevel = UNSET_INT;
   long maximumSize = UNSET_INT;
   long maximumWeight = UNSET_INT;
-  @CheckForNull Weigher<? super K, ? super V> weigher;
+  @Nullable Weigher<? super K, ? super V> weigher;
 
-  @CheckForNull Strength keyStrength;
-  @CheckForNull Strength valueStrength;
+  @Nullable Strength keyStrength;
+  @Nullable Strength valueStrength;
 
   @SuppressWarnings("GoodTime") // should be a Duration
   long expireAfterWriteNanos = UNSET_INT;
@@ -300,11 +300,11 @@ public final class CacheBuilder<K, V> {
   @SuppressWarnings("GoodTime") // should be a Duration
   long refreshNanos = UNSET_INT;
 
-  @CheckForNull Equivalence<Object> keyEquivalence;
-  @CheckForNull Equivalence<Object> valueEquivalence;
+  @Nullable Equivalence<Object> keyEquivalence;
+  @Nullable Equivalence<Object> valueEquivalence;
 
-  @CheckForNull RemovalListener<? super K, ? super V> removalListener;
-  @CheckForNull Ticker ticker;
+  @Nullable RemovalListener<? super K, ? super V> removalListener;
+  @Nullable Ticker ticker;
 
   Supplier<? extends StatsCounter> statsCounterSupplier = NULL_STATS_COUNTER;
 
@@ -725,7 +725,7 @@ public final class CacheBuilder<K, V> {
   @SuppressWarnings("GoodTime") // Duration decomposition
   @CanIgnoreReturnValue
   public CacheBuilder<K, V> expireAfterWrite(Duration duration) {
-    return expireAfterWrite(toNanosSaturated(duration), TimeUnit.NANOSECONDS);
+    return expireAfterWrite(toNanosSaturated(duration), NANOSECONDS);
   }
 
   /**
@@ -798,7 +798,7 @@ public final class CacheBuilder<K, V> {
   @SuppressWarnings("GoodTime") // Duration decomposition
   @CanIgnoreReturnValue
   public CacheBuilder<K, V> expireAfterAccess(Duration duration) {
-    return expireAfterAccess(toNanosSaturated(duration), TimeUnit.NANOSECONDS);
+    return expireAfterAccess(toNanosSaturated(duration), NANOSECONDS);
   }
 
   /**
@@ -880,7 +880,7 @@ public final class CacheBuilder<K, V> {
   @SuppressWarnings("GoodTime") // Duration decomposition
   @CanIgnoreReturnValue
   public CacheBuilder<K, V> refreshAfterWrite(Duration duration) {
-    return refreshAfterWrite(toNanosSaturated(duration), TimeUnit.NANOSECONDS);
+    return refreshAfterWrite(toNanosSaturated(duration), NANOSECONDS);
   }
 
   /**
@@ -971,7 +971,6 @@ public final class CacheBuilder<K, V> {
    *
    * @return the cache builder reference that should be used instead of {@code this} for any
    *     remaining configuration and cache building
-   * @return this {@code CacheBuilder} instance (for chaining)
    * @throws IllegalStateException if a removal listener was already set
    */
   public <K1 extends K, V1 extends V> CacheBuilder<K1, V1> removalListener(

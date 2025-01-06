@@ -47,7 +47,6 @@ import java.math.RoundingMode;
  * @since 11.0
  */
 @GwtCompatible(emulated = true)
-@ElementTypesAreNonnullByDefault
 public final class IntMath {
   @VisibleForTesting static final int MAX_SIGNED_POWER_OF_TWO = 1 << (Integer.SIZE - 2);
 
@@ -136,10 +135,8 @@ public final class IntMath {
         // floor(2^(logFloor + 0.5))
         int logFloor = (Integer.SIZE - 1) - leadingZeros;
         return logFloor + lessThanBranchFree(cmp, x);
-
-      default:
-        throw new AssertionError();
     }
+    throw new AssertionError();
   }
 
   /** The biggest half power of two that can fit in an unsigned int. */
@@ -173,9 +170,8 @@ public final class IntMath {
       case HALF_EVEN:
         // sqrt(10) is irrational, so log10(x) - logFloor is never exactly 0.5
         return logFloor + lessThanBranchFree(halfPowersOf10[logFloor], x);
-      default:
-        throw new AssertionError();
     }
+    throw new AssertionError();
   }
 
   private static int log10Floor(int x) {
@@ -292,9 +288,8 @@ public final class IntMath {
          * signed int, so lessThanBranchFree is safe for use.
          */
         return sqrtFloor + lessThanBranchFree(halfSquare, x);
-      default:
-        throw new AssertionError();
     }
+    throw new AssertionError();
   }
 
   private static int sqrtFloor(int x) {

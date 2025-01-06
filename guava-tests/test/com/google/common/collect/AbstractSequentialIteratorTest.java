@@ -16,21 +16,24 @@
 
 package com.google.common.collect;
 
+import static com.google.common.collect.ReflectionFreeAssertThrows.assertThrows;
 import static com.google.common.collect.testing.IteratorFeature.UNMODIFIABLE;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
+import com.google.common.collect.TestExceptions.SomeUncheckedException;
 import com.google.common.collect.testing.IteratorTester;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /** Tests for {@link AbstractSequentialIterator}. */
 @GwtCompatible(emulated = true)
-@ElementTypesAreNonnullByDefault
+@NullMarked
 public class AbstractSequentialIteratorTest extends TestCase {
   @GwtIncompatible // Too slow
   public void testDoublerExhaustive() {
@@ -109,32 +112,16 @@ public class AbstractSequentialIteratorTest extends TestCase {
   public void testEmpty() {
     Iterator<Object> empty = new EmptyAbstractSequentialIterator<>();
     assertFalse(empty.hasNext());
-    try {
-      empty.next();
-      fail();
-    } catch (NoSuchElementException expected) {
-    }
-    try {
-      empty.remove();
-      fail();
-    } catch (UnsupportedOperationException expected) {
-    }
+    assertThrows(NoSuchElementException.class, empty::next);
+    assertThrows(UnsupportedOperationException.class, empty::remove);
   }
 
   public void testBroken() {
     Iterator<Object> broken = new BrokenAbstractSequentialIterator();
     assertTrue(broken.hasNext());
     // We can't retrieve even the known first element:
-    try {
-      broken.next();
-      fail();
-    } catch (MyException expected) {
-    }
-    try {
-      broken.next();
-      fail();
-    } catch (MyException expected) {
-    }
+    assertThrows(SomeUncheckedException.class, broken::next);
+    assertThrows(SomeUncheckedException.class, broken::next);
   }
 
   private static Iterator<Integer> newDoubler(int first, final int last) {
@@ -166,9 +153,7 @@ public class AbstractSequentialIteratorTest extends TestCase {
 
     @Override
     protected Object computeNext(Object previous) {
-      throw new MyException();
+      throw new SomeUncheckedException();
     }
   }
-
-  private static class MyException extends RuntimeException {}
 }

@@ -15,6 +15,7 @@
 package com.google.common.collect;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.collect.ReflectionFreeAssertThrows.assertThrows;
 
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
@@ -32,7 +33,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Unit test for {@link AbstractMultiset}.
@@ -42,7 +44,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 @SuppressWarnings("serial") // No serialization is used in this test
 @GwtCompatible(emulated = true)
-@ElementTypesAreNonnullByDefault
+@NullMarked
 public class SimpleAbstractMultisetTest extends TestCase {
   @J2ktIncompatible
   @GwtIncompatible // suite
@@ -68,6 +70,7 @@ public class SimpleAbstractMultisetTest extends TestCase {
     return suite;
   }
 
+  @SuppressWarnings("ModifiedButNotUsed")
   public void testFastAddAllMultiset() {
     final AtomicInteger addCalls = new AtomicInteger();
     Multiset<String> multiset =
@@ -87,11 +90,7 @@ public class SimpleAbstractMultisetTest extends TestCase {
   public void testRemoveUnsupported() {
     Multiset<String> multiset = new NoRemoveMultiset<>();
     multiset.add("a");
-    try {
-      multiset.remove("a");
-      fail();
-    } catch (UnsupportedOperationException expected) {
-    }
+    assertThrows(UnsupportedOperationException.class, () -> multiset.remove("a"));
     assertTrue(multiset.contains("a"));
   }
 

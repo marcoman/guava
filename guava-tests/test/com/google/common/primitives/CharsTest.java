@@ -16,6 +16,9 @@
 
 package com.google.common.primitives;
 
+import static com.google.common.primitives.Chars.max;
+import static com.google.common.primitives.Chars.min;
+import static com.google.common.primitives.ReflectionFreeAssertThrows.assertThrows;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
@@ -32,7 +35,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import junit.framework.TestCase;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Unit test for {@link Chars}.
@@ -40,7 +44,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author Kevin Bourrillion
  */
 @GwtCompatible(emulated = true)
-@ElementTypesAreNonnullByDefault
+@NullMarked
 public class CharsTest extends TestCase {
   private static final char[] EMPTY = {};
   private static final char[] ARRAY1 = {(char) 1};
@@ -88,6 +92,8 @@ public class CharsTest extends TestCase {
     }
   }
 
+  // We need to test that our method behaves like the JDK method.
+  @SuppressWarnings("InlineMeInliner")
   public void testCompare() {
     for (char x : VALUES) {
       for (char y : VALUES) {
@@ -167,32 +173,24 @@ public class CharsTest extends TestCase {
   }
 
   public void testMax_noArgs() {
-    try {
-      Chars.max();
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> max());
   }
 
   public void testMax() {
-    assertThat(Chars.max(LEAST)).isEqualTo(LEAST);
-    assertThat(Chars.max(GREATEST)).isEqualTo(GREATEST);
-    assertThat(Chars.max((char) 8, (char) 6, (char) 7, (char) 5, (char) 3, (char) 0, (char) 9))
+    assertThat(max(LEAST)).isEqualTo(LEAST);
+    assertThat(max(GREATEST)).isEqualTo(GREATEST);
+    assertThat(max((char) 8, (char) 6, (char) 7, (char) 5, (char) 3, (char) 0, (char) 9))
         .isEqualTo((char) 9);
   }
 
   public void testMin_noArgs() {
-    try {
-      Chars.min();
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> min());
   }
 
   public void testMin() {
-    assertThat(Chars.min(LEAST)).isEqualTo(LEAST);
-    assertThat(Chars.min(GREATEST)).isEqualTo(GREATEST);
-    assertThat(Chars.min((char) 8, (char) 6, (char) 7, (char) 5, (char) 3, (char) 0, (char) 9))
+    assertThat(min(LEAST)).isEqualTo(LEAST);
+    assertThat(min(GREATEST)).isEqualTo(GREATEST);
+    assertThat(min((char) 8, (char) 6, (char) 7, (char) 5, (char) 3, (char) 0, (char) 9))
         .isEqualTo((char) 0);
   }
 
@@ -202,11 +200,8 @@ public class CharsTest extends TestCase {
     assertThat(Chars.constrainToRange((char) 1, (char) 3, (char) 5)).isEqualTo((char) 3);
     assertThat(Chars.constrainToRange((char) 255, (char) 250, (char) 254)).isEqualTo((char) 254);
     assertThat(Chars.constrainToRange((char) 5, (char) 2, (char) 2)).isEqualTo((char) 2);
-    try {
-      Chars.constrainToRange((char) 1, (char) 3, (char) 2);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(
+        IllegalArgumentException.class, () -> Chars.constrainToRange((char) 1, (char) 3, (char) 2));
   }
 
   public void testConcat() {
@@ -261,11 +256,8 @@ public class CharsTest extends TestCase {
 
   @GwtIncompatible // Chars.fromByteArray
   public void testFromByteArrayFails() {
-    try {
-      Chars.fromByteArray(new byte[Chars.BYTES - 1]);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(
+        IllegalArgumentException.class, () -> Chars.fromByteArray(new byte[Chars.BYTES - 1]));
   }
 
   @GwtIncompatible // Chars.fromBytes
@@ -303,11 +295,7 @@ public class CharsTest extends TestCase {
 
   @GwtIncompatible // Chars.fromByteArray, Chars.toByteArray
   public void testByteArrayRoundTripsFails() {
-    try {
-      Chars.fromByteArray(new byte[] {0x11});
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> Chars.fromByteArray(new byte[] {0x11}));
   }
 
   public void testEnsureCapacity() {
@@ -319,17 +307,8 @@ public class CharsTest extends TestCase {
   }
 
   public void testEnsureCapacity_fail() {
-    try {
-      Chars.ensureCapacity(ARRAY1, -1, 1);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
-    try {
-      // notice that this should even fail when no growth was needed
-      Chars.ensureCapacity(ARRAY1, 1, -1);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> Chars.ensureCapacity(ARRAY1, -1, 1));
+    assertThrows(IllegalArgumentException.class, () -> Chars.ensureCapacity(ARRAY1, 1, -1));
   }
 
   public void testJoin() {
@@ -652,11 +631,7 @@ public class CharsTest extends TestCase {
 
   public void testToArray_withNull() {
     List<@Nullable Character> list = Arrays.asList((char) 0, (char) 1, null);
-    try {
-      Chars.toArray(list);
-      fail();
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(NullPointerException.class, () -> Chars.toArray(list));
   }
 
   @J2ktIncompatible // b/285319375

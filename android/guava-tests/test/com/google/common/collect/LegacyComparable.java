@@ -16,10 +16,12 @@
 
 package com.google.common.collect;
 
+import static java.util.Arrays.asList;
+
 import com.google.common.annotations.GwtCompatible;
 import java.io.Serializable;
-import java.util.Arrays;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A class that implements {@code Comparable} without generics, such as those found in libraries
@@ -30,14 +32,14 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 @SuppressWarnings({"ComparableType", "rawtypes"}) // https://github.com/google/guava/issues/989
 @GwtCompatible
-@ElementTypesAreNonnullByDefault
+@NullMarked
 class LegacyComparable implements Comparable, Serializable {
   static final LegacyComparable X = new LegacyComparable("x");
   static final LegacyComparable Y = new LegacyComparable("y");
   static final LegacyComparable Z = new LegacyComparable("z");
 
-  static final Iterable<LegacyComparable> VALUES_FORWARD = Arrays.asList(X, Y, Z);
-  static final Iterable<LegacyComparable> VALUES_BACKWARD = Arrays.asList(Z, Y, X);
+  static final Iterable<LegacyComparable> VALUES_FORWARD = asList(X, Y, Z);
+  static final Iterable<LegacyComparable> VALUES_BACKWARD = asList(Z, Y, X);
 
   private final String value;
 

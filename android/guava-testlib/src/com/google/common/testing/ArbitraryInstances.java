@@ -19,6 +19,7 @@ package com.google.common.testing;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.google.common.annotations.GwtIncompatible;
 import com.google.common.annotations.J2ktIncompatible;
@@ -144,7 +145,8 @@ import java.util.logging.Logger;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Supplies an arbitrary "default" instance for a wide range of types, often useful in testing
@@ -170,7 +172,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 @GwtIncompatible
 @J2ktIncompatible
-@ElementTypesAreNonnullByDefault
+@NullMarked
 public final class ArbitraryInstances {
 
   private static final Ordering<Field> BY_FIELD_NAME =
@@ -205,7 +207,7 @@ public final class ArbitraryInstances {
           .put(String.class, "")
           .put(Pattern.class, Pattern.compile(""))
           .put(MatchResult.class, createMatchResult())
-          .put(TimeUnit.class, TimeUnit.SECONDS)
+          .put(TimeUnit.class, SECONDS)
           .put(Charset.class, UTF_8)
           .put(Currency.class, Currency.getInstance(Locale.US))
           .put(Locale.class, Locale.US)

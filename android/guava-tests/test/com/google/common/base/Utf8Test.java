@@ -32,6 +32,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 import junit.framework.TestCase;
+import org.jspecify.annotations.NullUnmarked;
 
 /**
  * Unit tests for {@link Utf8}.
@@ -41,6 +42,7 @@ import junit.framework.TestCase;
  * @author Clément Roux
  */
 @GwtCompatible(emulated = true)
+@NullUnmarked
 public class Utf8Test extends TestCase {
 
   private static final ImmutableList<String> ILL_FORMED_STRINGS;
@@ -59,6 +61,8 @@ public class Utf8Test extends TestCase {
     builder.add(newString(MIN_LOW_SURROGATE, MAX_HIGH_SURROGATE));
     ILL_FORMED_STRINGS = builder.build();
   }
+
+  // We can't use Character.isSurrogate(c) because of GWT.
 
   public void testEncodedLength_validStrings() {
     assertEquals(0, Utf8.encodedLength(""));

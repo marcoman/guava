@@ -16,14 +16,19 @@
 
 package com.google.common.escape;
 
+
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.escape.testing.EscaperAsserts;
 import java.io.IOException;
 import junit.framework.TestCase;
+import org.jspecify.annotations.NullUnmarked;
 
-/** @author David Beaumont */
+/**
+ * @author David Beaumont
+ */
 @GwtCompatible
+@NullUnmarked
 public class EscapersTest extends TestCase {
   public void testNullEscaper() throws IOException {
     Escaper escaper = Escapers.nullEscaper();

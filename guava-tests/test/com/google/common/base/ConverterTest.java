@@ -29,9 +29,11 @@ import com.google.common.testing.SerializableTester;
 import java.util.Iterator;
 import java.util.List;
 import junit.framework.TestCase;
+import org.jspecify.annotations.NullUnmarked;
 
 /** Unit tests for {@link Converter}. */
 @GwtCompatible(emulated = true)
+@NullUnmarked
 public class ConverterTest extends TestCase {
 
   private static final Converter<String, Long> STR_TO_LONG =
@@ -101,6 +103,8 @@ public class ConverterTest extends TestCase {
     assertEquals(converter, converter.reverse().reverse());
   }
 
+  // We need to test that apply() does in fact behave like convert().
+  @SuppressWarnings("InlineMeInliner")
   public void testApply() {
     assertEquals(LONG_VAL, STR_TO_LONG.apply(STR_VAL));
   }
@@ -140,7 +144,9 @@ public class ConverterTest extends TestCase {
 
     assertEquals("StringWrapper.andThen(string2long)", converter.toString());
 
-    assertEquals(first.andThen(STR_TO_LONG), first.andThen(STR_TO_LONG));
+    new EqualsTester()
+        .addEqualityGroup(first.andThen(STR_TO_LONG), first.andThen(STR_TO_LONG))
+        .testEquals();
   }
 
   @GwtIncompatible // J2CL generics problem

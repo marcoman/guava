@@ -19,6 +19,7 @@ package com.google.common.collect;
 import static com.google.common.collect.BoundType.CLOSED;
 import static com.google.common.collect.BoundType.OPEN;
 import static com.google.common.collect.DiscreteDomain.integers;
+import static com.google.common.collect.ReflectionFreeAssertThrows.assertThrows;
 import static com.google.common.collect.testing.features.CollectionFeature.ALLOWS_NULL_QUERIES;
 import static com.google.common.collect.testing.features.CollectionFeature.KNOWN_ORDER;
 import static com.google.common.collect.testing.features.CollectionFeature.NON_STANDARD_TOSTRING;
@@ -44,11 +45,13 @@ import java.util.Set;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.jspecify.annotations.NullUnmarked;
 
 /**
  * @author Gregory Kick
  */
 @GwtCompatible(emulated = true)
+@NullUnmarked
 public class ContiguousSetTest extends TestCase {
   private static final DiscreteDomain<Integer> NOT_EQUAL_TO_INTEGERS =
       new DiscreteDomain<Integer>() {
@@ -79,29 +82,13 @@ public class ContiguousSetTest extends TestCase {
       };
 
   public void testInvalidIntRange() {
-    try {
-      ContiguousSet.closed(2, 1);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
-    try {
-      ContiguousSet.closedOpen(2, 1);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> ContiguousSet.closed(2, 1));
+    assertThrows(IllegalArgumentException.class, () -> ContiguousSet.closedOpen(2, 1));
   }
 
   public void testInvalidLongRange() {
-    try {
-      ContiguousSet.closed(2L, 1L);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
-    try {
-      ContiguousSet.closedOpen(2L, 1L);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> ContiguousSet.closed(2L, 1L));
+    assertThrows(IllegalArgumentException.class, () -> ContiguousSet.closedOpen(2L, 1L));
   }
 
   public void testEquals() {
@@ -178,20 +165,16 @@ public class ContiguousSetTest extends TestCase {
 
   public void testCreate_noMin() {
     Range<Integer> range = Range.lessThan(0);
-    try {
-      ContiguousSet.create(range, UNBOUNDED_THROWING_DOMAIN);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> ContiguousSet.create(range, UNBOUNDED_THROWING_DOMAIN));
   }
 
   public void testCreate_noMax() {
     Range<Integer> range = Range.greaterThan(0);
-    try {
-      ContiguousSet.create(range, UNBOUNDED_THROWING_DOMAIN);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> ContiguousSet.create(range, UNBOUNDED_THROWING_DOMAIN));
   }
 
   public void testCreate_empty() {
@@ -257,11 +240,7 @@ public class ContiguousSetTest extends TestCase {
 
   public void testSubSet_outOfOrder() {
     ImmutableSortedSet<Integer> set = ContiguousSet.create(Range.closed(1, 3), integers());
-    try {
-      set.subSet(3, 2);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> set.subSet(3, 2));
   }
 
   public void testSubSet_tooLarge() {

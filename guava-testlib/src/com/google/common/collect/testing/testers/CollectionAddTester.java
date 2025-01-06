@@ -16,17 +16,18 @@
 
 package com.google.common.collect.testing.testers;
 
+import static com.google.common.collect.testing.Helpers.getMethod;
 import static com.google.common.collect.testing.features.CollectionFeature.ALLOWS_NULL_VALUES;
 import static com.google.common.collect.testing.features.CollectionFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION;
 import static com.google.common.collect.testing.features.CollectionFeature.RESTRICTS_ELEMENTS;
 import static com.google.common.collect.testing.features.CollectionFeature.SUPPORTS_ADD;
 import static com.google.common.collect.testing.features.CollectionSize.ZERO;
+import static com.google.common.collect.testing.testers.ReflectionFreeAssertThrows.assertThrows;
 
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
 import com.google.common.annotations.J2ktIncompatible;
 import com.google.common.collect.testing.AbstractCollectionTester;
-import com.google.common.collect.testing.Helpers;
 import com.google.common.collect.testing.features.CollectionFeature;
 import com.google.common.collect.testing.features.CollectionSize;
 import java.lang.reflect.Method;
@@ -42,7 +43,8 @@ import org.junit.Ignore;
  * @author Kevin Bourrillion
  */
 @GwtCompatible(emulated = true)
-@Ignore // Affects only Android test runner, which respects JUnit 4 annotations on JUnit 3 tests.
+@Ignore("test runners must not instantiate and run this directly, only via suites we build")
+// @Ignore affects the Android test runner, which respects JUnit 4 annotations on JUnit 3 tests.
 @SuppressWarnings("JUnit4ClassUsedInJUnit3")
 public class CollectionAddTester<E> extends AbstractCollectionTester<E> {
   @CollectionFeature.Require(SUPPORTS_ADD)
@@ -53,11 +55,7 @@ public class CollectionAddTester<E> extends AbstractCollectionTester<E> {
 
   @CollectionFeature.Require(absent = SUPPORTS_ADD)
   public void testAdd_unsupportedNotPresent() {
-    try {
-      collection.add(e3());
-      fail("add(notPresent) should throw");
-    } catch (UnsupportedOperationException expected) {
-    }
+    assertThrows(UnsupportedOperationException.class, () -> collection.add(e3()));
     expectUnchanged();
     expectMissing(e3());
   }
@@ -82,11 +80,7 @@ public class CollectionAddTester<E> extends AbstractCollectionTester<E> {
 
   @CollectionFeature.Require(value = SUPPORTS_ADD, absent = ALLOWS_NULL_VALUES)
   public void testAdd_nullUnsupported() {
-    try {
-      collection.add(null);
-      fail("add(null) should throw");
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(NullPointerException.class, () -> collection.add(null));
     expectUnchanged();
     expectNullMissingWhenNullUnsupported("Should not contain null after unsupported add(null)");
   }
@@ -94,41 +88,40 @@ public class CollectionAddTester<E> extends AbstractCollectionTester<E> {
   @CollectionFeature.Require({SUPPORTS_ADD, FAILS_FAST_ON_CONCURRENT_MODIFICATION})
   @CollectionSize.Require(absent = ZERO)
   public void testAddConcurrentWithIteration() {
-    try {
-      Iterator<E> iterator = collection.iterator();
-      assertTrue(collection.add(e3()));
-      iterator.next();
-      fail("Expected ConcurrentModificationException");
-    } catch (ConcurrentModificationException expected) {
-      // success
-    }
+    assertThrows(
+        ConcurrentModificationException.class,
+        () -> {
+          Iterator<E> iterator = collection.iterator();
+          assertTrue(collection.add(e3()));
+          iterator.next();
+        });
   }
 
   /**
    * Returns the {@link Method} instance for {@link #testAdd_nullSupported()} so that tests of
    * {@link java.util.Collections#checkedCollection(java.util.Collection, Class)} can suppress it
    * with {@code FeatureSpecificTestSuiteBuilder.suppressing()} until <a
-   * href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6409434">Sun bug 6409434</a> is fixed.
-   * It's unclear whether nulls were to be permitted or forbidden, but presumably the eventual fix
-   * will be to permit them, as it seems more likely that code would depend on that behavior than on
-   * the other. Thus, we say the bug is in add(), which fails to support null.
+   * href="https://bugs.openjdk.org/browse/JDK-6409434">JDK-6409434</a> is fixed. It's unclear
+   * whether nulls were to be permitted or forbidden, but presumably the eventual fix will be to
+   * permit them, as it seems more likely that code would depend on that behavior than on the other.
+   * Thus, we say the bug is in add(), which fails to support null.
    */
   @J2ktIncompatible
   @GwtIncompatible // reflection
   public static Method getAddNullSupportedMethod() {
-    return Helpers.getMethod(CollectionAddTester.class, "testAdd_nullSupported");
+    return getMethod(CollectionAddTester.class, "testAdd_nullSupported");
   }
 
   /**
    * Returns the {@link Method} instance for {@link #testAdd_nullSupported()} so that tests of
    * {@link java.util.TreeSet} can suppress it with {@code
    * FeatureSpecificTestSuiteBuilder.suppressing()} until <a
-   * href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5045147">Sun bug 5045147</a> is fixed.
+   * href="https://bugs.openjdk.org/browse/JDK-5045147">JDK-5045147</a> is fixed.
    */
   @J2ktIncompatible
   @GwtIncompatible // reflection
   public static Method getAddNullUnsupportedMethod() {
-    return Helpers.getMethod(CollectionAddTester.class, "testAdd_nullUnsupported");
+    return getMethod(CollectionAddTester.class, "testAdd_nullUnsupported");
   }
 
   /**
@@ -141,6 +134,6 @@ public class CollectionAddTester<E> extends AbstractCollectionTester<E> {
   @J2ktIncompatible
   @GwtIncompatible // reflection
   public static Method getAddUnsupportedNotPresentMethod() {
-    return Helpers.getMethod(CollectionAddTester.class, "testAdd_unsupportedNotPresent");
+    return getMethod(CollectionAddTester.class, "testAdd_unsupportedNotPresent");
   }
 }

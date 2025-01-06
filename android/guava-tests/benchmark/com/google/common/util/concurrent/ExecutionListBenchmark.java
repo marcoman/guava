@@ -17,6 +17,7 @@
 package com.google.common.util.concurrent;
 
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 import com.google.caliper.AfterExperiment;
 import com.google.caliper.BeforeExperiment;
@@ -38,15 +39,16 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 import sun.misc.Unsafe;
 
 /** Benchmarks for {@link ExecutionList}. */
 @VmOptions({"-Xms8g", "-Xmx8g"})
+@NullUnmarked
 public class ExecutionListBenchmark {
   private static final int NUM_THREADS = 10; // make a param?
 
@@ -87,7 +89,7 @@ public class ExecutionListBenchmark {
       @Override
       ExecutionListWrapper newExecutionList() {
         return new ExecutionListWrapper() {
-          final ExecutionListCAS list = new ExecutionListCAS();
+          final ExecutionListUsingCompareAndSwap list = new ExecutionListUsingCompareAndSwap();
 
           @Override
           public void add(Runnable runnable, Executor executor) {
@@ -251,7 +253,7 @@ public class ExecutionListBenchmark {
             NUM_THREADS,
             NUM_THREADS,
             Long.MAX_VALUE,
-            TimeUnit.SECONDS,
+            SECONDS,
             new ArrayBlockingQueue<Runnable>(1000));
     executorService.prestartAllCoreThreads();
     final AtomicInteger integer = new AtomicInteger();
@@ -579,8 +581,8 @@ public class ExecutionListBenchmark {
 
   // A version of the list that uses compare and swap to manage the stack without locks.
   @SuppressWarnings({"SunApi", "removal"}) // b/345822163
-  private static final class ExecutionListCAS {
-    static final Logger log = Logger.getLogger(ExecutionListCAS.class.getName());
+  private static final class ExecutionListUsingCompareAndSwap {
+    static final Logger log = Logger.getLogger(ExecutionListUsingCompareAndSwap.class.getName());
 
     private static final Unsafe UNSAFE;
     private static final long HEAD_OFFSET;
@@ -594,7 +596,9 @@ public class ExecutionListBenchmark {
     static {
       try {
         UNSAFE = getUnsafe();
-        HEAD_OFFSET = UNSAFE.objectFieldOffset(ExecutionListCAS.class.getDeclaredField("head"));
+        HEAD_OFFSET =
+            UNSAFE.objectFieldOffset(
+                ExecutionListUsingCompareAndSwap.class.getDeclaredField("head"));
       } catch (Exception ex) {
         throw new Error(ex);
       }

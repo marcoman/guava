@@ -16,13 +16,16 @@
 
 package com.google.common.collect.testing.google;
 
+import static com.google.common.collect.testing.Helpers.copyToList;
+import static com.google.common.collect.testing.Helpers.mapEntry;
+
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.collect.ListMultimap;
-import com.google.common.collect.testing.Helpers;
 import com.google.common.collect.testing.SampleElements;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * A skeleton generator for a {@code ListMultimap} implementation.
@@ -30,18 +33,18 @@ import java.util.Map.Entry;
  * @author Louis Wasserman
  */
 @GwtCompatible
-@ElementTypesAreNonnullByDefault
+@NullMarked
 public abstract class TestStringListMultimapGenerator
     implements TestListMultimapGenerator<String, String> {
 
   @Override
   public SampleElements<Entry<String, String>> samples() {
     return new SampleElements<>(
-        Helpers.mapEntry("one", "January"),
-        Helpers.mapEntry("two", "February"),
-        Helpers.mapEntry("three", "March"),
-        Helpers.mapEntry("four", "April"),
-        Helpers.mapEntry("five", "May"));
+        mapEntry("one", "January"),
+        mapEntry("two", "February"),
+        mapEntry("three", "March"),
+        mapEntry("four", "April"),
+        mapEntry("five", "May"));
   }
 
   @Override
@@ -56,7 +59,7 @@ public abstract class TestStringListMultimapGenerator
 
   @Override
   public Collection<String> createCollection(Iterable<? extends String> values) {
-    return Helpers.copyToList(values);
+    return copyToList(values);
   }
 
   @Override

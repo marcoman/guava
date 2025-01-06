@@ -16,12 +16,14 @@
 
 package com.google.common.collect.testing;
 
+import static com.google.common.collect.testing.Helpers.mapEntry;
 import static com.google.common.collect.testing.Helpers.orderEntriesByKey;
 
 import com.google.common.annotations.GwtCompatible;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * Implementation helper for {@link TestMapGenerator} for use with enum maps.
@@ -29,17 +31,17 @@ import java.util.Map.Entry;
  * @author Kevin Bourrillion
  */
 @GwtCompatible
-@ElementTypesAreNonnullByDefault
+@NullMarked
 public abstract class TestEnumMapGenerator implements TestMapGenerator<AnEnum, String> {
 
   @Override
   public SampleElements<Entry<AnEnum, String>> samples() {
     return new SampleElements<>(
-        Helpers.mapEntry(AnEnum.A, "January"),
-        Helpers.mapEntry(AnEnum.B, "February"),
-        Helpers.mapEntry(AnEnum.C, "March"),
-        Helpers.mapEntry(AnEnum.D, "April"),
-        Helpers.mapEntry(AnEnum.E, "May"));
+        mapEntry(AnEnum.A, "January"),
+        mapEntry(AnEnum.B, "February"),
+        mapEntry(AnEnum.C, "March"),
+        mapEntry(AnEnum.D, "April"),
+        mapEntry(AnEnum.E, "May"));
   }
 
   @Override

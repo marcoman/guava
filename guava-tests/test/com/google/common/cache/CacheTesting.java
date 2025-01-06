@@ -16,6 +16,8 @@ package com.google.common.cache;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.truth.Truth.assertThat;
+import static java.lang.Math.max;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertNotNull;
@@ -42,9 +44,9 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.concurrent.ConcurrentMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReferenceArray;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A collection of utilities for {@link Cache} testing.
@@ -52,6 +54,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author mike nonemacher
  */
 @SuppressWarnings("GuardedBy") // TODO(b/35466881): Fix or suppress.
+@NullUnmarked
 class CacheTesting {
 
   /**
@@ -355,7 +358,7 @@ class CacheTesting {
   }
 
   static int expirationQueueSize(Cache<?, ?> cache) {
-    return Math.max(accessQueueSize(cache), writeQueueSize(cache));
+    return max(accessQueueSize(cache), writeQueueSize(cache));
   }
 
   static void processPendingNotifications(Cache<?, ?> cache) {
@@ -420,7 +423,7 @@ class CacheTesting {
       drainRecencyQueue(segment);
     }
 
-    ticker.advance(2 * expiringTime, TimeUnit.MILLISECONDS);
+    ticker.advance(2 * expiringTime, MILLISECONDS);
 
     long now = ticker.read();
     for (Segment<?, ?> segment : cchm.segments) {

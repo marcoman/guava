@@ -19,15 +19,18 @@ import static com.google.common.util.concurrent.Futures.getDone;
 import static com.google.common.util.concurrent.Futures.immediateCancelledFuture;
 import static com.google.common.util.concurrent.Futures.immediateFailedFuture;
 import static com.google.common.util.concurrent.Futures.immediateFuture;
+import static com.google.common.util.concurrent.ReflectionFreeAssertThrows.assertThrows;
 
 import com.google.common.annotations.GwtCompatible;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import junit.framework.TestCase;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 
 /** Unit tests for {@link Futures#getDone}. */
 @GwtCompatible
+@NullUnmarked
 public class FuturesGetDoneTest extends TestCase {
   public void testSuccessful() throws ExecutionException {
     assertThat(getDone(immediateFuture("a"))).isEqualTo("a");
@@ -39,27 +42,16 @@ public class FuturesGetDoneTest extends TestCase {
 
   public void testFailed() {
     Exception failureCause = new Exception();
-    try {
-      getDone(immediateFailedFuture(failureCause));
-      fail();
-    } catch (ExecutionException expected) {
-      assertThat(expected).hasCauseThat().isEqualTo(failureCause);
-    }
+    ExecutionException expected =
+        assertThrows(ExecutionException.class, () -> getDone(immediateFailedFuture(failureCause)));
+    assertThat(expected).hasCauseThat().isEqualTo(failureCause);
   }
 
   public void testCancelled() throws ExecutionException {
-    try {
-      getDone(immediateCancelledFuture());
-      fail();
-    } catch (CancellationException expected) {
-    }
+    assertThrows(CancellationException.class, () -> getDone(immediateCancelledFuture()));
   }
 
   public void testPending() throws ExecutionException {
-    try {
-      getDone(SettableFuture.create());
-      fail();
-    } catch (IllegalStateException expected) {
-    }
+    assertThrows(IllegalStateException.class, () -> getDone(SettableFuture.create()));
   }
 }

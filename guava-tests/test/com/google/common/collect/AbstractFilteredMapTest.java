@@ -16,16 +16,19 @@
 
 package com.google.common.collect;
 
+import static com.google.common.collect.ReflectionFreeAssertThrows.assertThrows;
+
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import java.util.Map;
 import java.util.Map.Entry;
 import junit.framework.TestCase;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 @GwtCompatible
-@ElementTypesAreNonnullByDefault
+@NullMarked
 abstract class AbstractFilteredMapTest extends TestCase {
   private static final Predicate<@Nullable String> NOT_LENGTH_3 =
       input -> input == null || input.length() != 3;
@@ -42,11 +45,7 @@ abstract class AbstractFilteredMapTest extends TestCase {
     filtered.put("b", 2);
     assertEquals(ImmutableMap.of("a", 1, "b", 2), filtered);
 
-    try {
-      filtered.put("yyy", 3);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> filtered.put("yyy", 3));
   }
 
   public void testFilteredKeysIllegalPutAll() {
@@ -56,11 +55,9 @@ abstract class AbstractFilteredMapTest extends TestCase {
     filtered.put("b", 2);
     assertEquals(ImmutableMap.of("a", 1, "b", 2), filtered);
 
-    try {
-      filtered.putAll(ImmutableMap.of("c", 3, "zzz", 4, "b", 5));
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> filtered.putAll(ImmutableMap.of("c", 3, "zzz", 4, "b", 5)));
 
     assertEquals(ImmutableMap.of("a", 1, "b", 2), filtered);
   }
@@ -91,11 +88,7 @@ abstract class AbstractFilteredMapTest extends TestCase {
     unfiltered.put("c", 5);
     assertEquals(ImmutableMap.of("a", 2, "b", 4), filtered);
 
-    try {
-      filtered.put("yyy", 3);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> filtered.put("yyy", 3));
     assertEquals(ImmutableMap.of("a", 2, "b", 4), filtered);
   }
 
@@ -107,11 +100,9 @@ abstract class AbstractFilteredMapTest extends TestCase {
     unfiltered.put("c", 5);
     assertEquals(ImmutableMap.of("a", 2, "b", 4), filtered);
 
-    try {
-      filtered.putAll(ImmutableMap.of("c", 4, "zzz", 5, "b", 6));
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> filtered.putAll(ImmutableMap.of("c", 4, "zzz", 5, "b", 6)));
     assertEquals(ImmutableMap.of("a", 2, "b", 4), filtered);
   }
 
@@ -123,11 +114,7 @@ abstract class AbstractFilteredMapTest extends TestCase {
     assertEquals(ImmutableMap.of("a", 2, "b", 4), filtered);
 
     Entry<String, Integer> entry = filtered.entrySet().iterator().next();
-    try {
-      entry.setValue(5);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> entry.setValue(5));
 
     assertEquals(ImmutableMap.of("a", 2, "b", 4), filtered);
   }
@@ -158,11 +145,7 @@ abstract class AbstractFilteredMapTest extends TestCase {
     filtered.put("chicken", 7);
     assertEquals(ImmutableMap.of("cat", 3, "horse", 5, "chicken", 7), filtered);
 
-    try {
-      filtered.put("cow", 7);
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> filtered.put("cow", 7));
     assertEquals(ImmutableMap.of("cat", 3, "horse", 5, "chicken", 7), filtered);
   }
 
@@ -177,11 +160,9 @@ abstract class AbstractFilteredMapTest extends TestCase {
     filtered.put("chicken", 7);
     assertEquals(ImmutableMap.of("cat", 3, "horse", 5, "chicken", 7), filtered);
 
-    try {
-      filtered.putAll(ImmutableMap.of("sheep", 5, "cow", 7));
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(
+        IllegalArgumentException.class,
+        () -> filtered.putAll(ImmutableMap.of("sheep", 5, "cow", 7)));
     assertEquals(ImmutableMap.of("cat", 3, "horse", 5, "chicken", 7), filtered);
   }
 

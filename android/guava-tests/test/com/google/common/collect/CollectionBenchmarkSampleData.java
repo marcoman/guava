@@ -17,17 +17,19 @@
 package com.google.common.collect;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.shuffle;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Package up sample data for common collections benchmarking.
  *
  * @author Nicholaus Shupe
  */
+@NullUnmarked
 class CollectionBenchmarkSampleData {
   private final boolean isUserTypeFast;
   private final SpecialRandom random;
@@ -75,7 +77,7 @@ class CollectionBenchmarkSampleData {
         queryList.addAll(elementsInSet);
       }
       List<Element> tmp = Lists.newArrayList(elementsInSet);
-      Collections.shuffle(tmp, random);
+      shuffle(tmp, random);
       queryList.addAll(tmp.subList(0, extras));
     }
 
@@ -86,7 +88,7 @@ class CollectionBenchmarkSampleData {
         queryList.add(candidate);
       }
     }
-    Collections.shuffle(queryList, random);
+    shuffle(queryList, random);
     return queryList.toArray(new Element[0]);
   }
 

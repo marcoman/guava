@@ -36,7 +36,6 @@ import java.util.Comparator;
 // TODO(kevinb): how to prevent warning on UnsignedBytes when building GWT
 // javadoc?
 @GwtCompatible
-@ElementTypesAreNonnullByDefault
 public final class SignedBytes {
   private SignedBytes() {}
 
@@ -82,7 +81,7 @@ public final class SignedBytes {
    * Compares the two specified {@code byte} values. The sign of the value returned is the same as
    * that of {@code ((Byte) a).compareTo(b)}.
    *
-   * <p><b>Note:</b> this method behaves identically to the JDK 7 method {@link Byte#compare}.
+   * <p><b>Note:</b> this method behaves identically to {@link Byte#compare}.
    *
    * @param a the first {@code byte} to compare
    * @param b the second {@code byte} to compare

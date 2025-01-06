@@ -15,12 +15,13 @@
 package com.google.common.collect.testing.google;
 
 import static com.google.common.collect.testing.Helpers.assertEqualInOrder;
+import static java.util.Arrays.asList;
 
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.collect.ListMultimap;
-import java.util.Arrays;
 import java.util.Collection;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 import org.junit.Ignore;
 
 /**
@@ -29,15 +30,16 @@ import org.junit.Ignore;
  * @author Louis Wasserman
  */
 @GwtCompatible
-@Ignore // Affects only Android test runner, which respects JUnit 4 annotations on JUnit 3 tests.
+@Ignore("test runners must not instantiate and run this directly, only via suites we build")
+// @Ignore affects the Android test runner, which respects JUnit 4 annotations on JUnit 3 tests.
 @SuppressWarnings("JUnit4ClassUsedInJUnit3")
-@ElementTypesAreNonnullByDefault
+@NullMarked
 public class AbstractListMultimapTester<K extends @Nullable Object, V extends @Nullable Object>
     extends AbstractMultimapTester<K, V, ListMultimap<K, V>> {
 
   @Override
   protected void assertGet(K key, V... values) {
-    assertGet(key, Arrays.asList(values));
+    assertGet(key, asList(values));
   }
 
   @Override

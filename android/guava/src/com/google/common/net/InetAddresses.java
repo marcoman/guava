@@ -16,6 +16,7 @@ package com.google.common.net;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.Math.max;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.GwtIncompatible;
@@ -36,8 +37,7 @@ import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Locale;
-import javax.annotation.CheckForNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Static utility methods pertaining to {@link InetAddress} instances.
@@ -102,7 +102,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 @J2ktIncompatible
 @GwtIncompatible
-@ElementTypesAreNonnullByDefault
 public final class InetAddresses {
   private static final int IPV4_PART_COUNT = 4;
   private static final int IPV6_PART_COUNT = 8;
@@ -150,7 +149,9 @@ public final class InetAddresses {
    * @param ipString {@code String} containing an IPv4 or IPv6 string literal, e.g. {@code
    *     "192.168.0.1"} or {@code "2001:db8::1"} or with a scope ID, e.g. {@code "2001:db8::1%eth0"}
    * @return {@link InetAddress} representing the argument
-   * @throws IllegalArgumentException if the argument is not a valid IP string literal
+   * @throws IllegalArgumentException if the argument is not a valid IP string literal or if the
+   *     address has a scope ID that fails validation against the interfaces on the machine (as
+   *     required by Java's {@link InetAddress})
    */
   @CanIgnoreReturnValue // TODO(b/219820829): consider removing
   public static InetAddress forString(String ipString) {
@@ -174,6 +175,10 @@ public final class InetAddresses {
    * want to accept ASCII digits only, you can use something like {@code
    * CharMatcher.ascii().matchesAllOf(ipString)}.
    *
+   * <p>Note that if this method returns {@code true}, a call to {@link #forString(String)} can
+   * still throw if the address has a scope ID that fails validation against the interfaces on the
+   * machine.
+   *
    * @param ipString {@code String} to evaluated as an IP string literal
    * @return {@code true} if the argument is a valid IP string literal
    */
@@ -186,8 +191,7 @@ public final class InetAddresses {
   }
 
   /** Returns {@code null} if unable to parse into a {@code byte[]}. */
-  @CheckForNull
-  private static byte[] ipStringToBytes(String ipStringParam, @Nullable Scope scope) {
+  private static byte @Nullable [] ipStringToBytes(String ipStringParam, @Nullable Scope scope) {
     String ipString = ipStringParam;
     // Make a first pass to categorize the characters in this string.
     boolean hasColon = false;
@@ -234,8 +238,7 @@ public final class InetAddresses {
     return null;
   }
 
-  @CheckForNull
-  private static byte[] textToNumericFormatV4(String ipString) {
+  private static byte @Nullable [] textToNumericFormatV4(String ipString) {
     if (IPV4_DELIMITER_MATCHER.countIn(ipString) + 1 != IPV4_PART_COUNT) {
       return null; // Wrong number of parts
     }
@@ -260,8 +263,7 @@ public final class InetAddresses {
     return bytes;
   }
 
-  @CheckForNull
-  private static byte[] textToNumericFormatV6(String ipString) {
+  private static byte @Nullable [] textToNumericFormatV6(String ipString) {
     // An address can have [2..8] colons.
     int delimiterCount = IPV6_DELIMITER_MATCHER.countIn(ipString);
     if (delimiterCount < 2 || delimiterCount > IPV6_PART_COUNT) {
@@ -331,8 +333,7 @@ public final class InetAddresses {
     return rawBytes.array();
   }
 
-  @CheckForNull
-  private static String convertDottedQuadToHex(String ipString) {
+  private static @Nullable String convertDottedQuadToHex(String ipString) {
     int lastColon = ipString.lastIndexOf(':');
     String initialPart = ipString.substring(0, lastColon + 1);
     String dottedQuad = ipString.substring(lastColon + 1);
@@ -480,8 +481,8 @@ public final class InetAddresses {
   }
 
   private static String scopeWithDelimiter(Inet6Address ip) {
-    // getHostAddress on android sometimes maps the scope id to an invalid interface name; if the
-    // mapped interface isn't present, fallback to use the scope id (which has no validation against
+    // getHostAddress on android sometimes maps the scope ID to an invalid interface name; if the
+    // mapped interface isn't present, fallback to use the scope ID (which has no validation against
     // present interfaces)
     NetworkInterface scopedInterface = ip.getScopedInterface();
     if (scopedInterface != null) {
@@ -600,8 +601,9 @@ public final class InetAddresses {
    * @param hostAddr an RFC 3986 section 3.2.2 encoded IPv4 or IPv6 address
    * @return an InetAddress representing the address in {@code hostAddr}
    * @throws IllegalArgumentException if {@code hostAddr} is not a valid IPv4 address, or IPv6
-   *     address surrounded by square brackets, or if the address has a scope id that fails
-   *     validation against interfaces on the machine
+   *     address surrounded by square brackets, or if the address has a scope ID that fails
+   *     validation against the interfaces on the machine (as required by Java's {@link
+   *     InetAddress})
    */
   public static InetAddress forUriString(String hostAddr) {
     InetAddress addr = forUriStringOrNull(hostAddr, /* parseScope= */ true);
@@ -612,8 +614,7 @@ public final class InetAddresses {
     return addr;
   }
 
-  @CheckForNull
-  private static InetAddress forUriStringOrNull(String hostAddr, boolean parseScope) {
+  private static @Nullable InetAddress forUriStringOrNull(String hostAddr, boolean parseScope) {
     checkNotNull(hostAddr);
 
     // Decide if this should be an IPv6 or IPv4 address.
@@ -647,7 +648,8 @@ public final class InetAddresses {
    * CharMatcher.ascii().matchesAllOf(ipString)}.
    *
    * <p>Note that if this method returns {@code true}, a call to {@link #forUriString(String)} can
-   * throw if the address has a scope id fails validation against interfaces on the machine.
+   * still throw if the address has a scope ID that fails validation against the interfaces on the
+   * machine.
    *
    * @param ipString {@code String} to evaluated as an IP URI host string literal
    * @return {@code true} if the argument is a valid IP URI host
@@ -764,7 +766,7 @@ public final class InetAddresses {
      */
     // TODO: why is this public?
     public TeredoInfo(
-        @CheckForNull Inet4Address server, @CheckForNull Inet4Address client, int port, int flags) {
+        @Nullable Inet4Address server, @Nullable Inet4Address client, int port, int flags) {
       checkArgument(
           (port >= 0) && (port <= 0xffff), "port '%s' is out of range (0 <= port <= 0xffff)", port);
       checkArgument(
@@ -1122,7 +1124,7 @@ public final class InetAddresses {
     byte[] addressBytes = address.toByteArray();
     byte[] targetCopyArray = new byte[numBytes];
 
-    int srcPos = Math.max(0, addressBytes.length - numBytes);
+    int srcPos = max(0, addressBytes.length - numBytes);
     int copyLength = addressBytes.length - srcPos;
     int destPos = numBytes - copyLength;
 

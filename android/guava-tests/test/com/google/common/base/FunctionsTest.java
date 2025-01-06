@@ -16,6 +16,8 @@
 
 package com.google.common.base;
 
+import static com.google.common.base.ReflectionFreeAssertThrows.assertThrows;
+
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
 import com.google.common.annotations.J2ktIncompatible;
@@ -28,7 +30,8 @@ import com.google.common.testing.SerializableTester;
 import java.io.Serializable;
 import java.util.Map;
 import junit.framework.TestCase;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Tests for {@link Functions}.
@@ -37,7 +40,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author Vlad Patryshev
  */
 @GwtCompatible(emulated = true)
-@ElementTypesAreNonnullByDefault
+@NullMarked
 public class FunctionsTest extends TestCase {
 
   public void testIdentity_same() {
@@ -70,11 +73,7 @@ public class FunctionsTest extends TestCase {
                     return "I'm a string";
                   }
                 }));
-    try {
-      Functions.toStringFunction().apply(null);
-      fail("expected NullPointerException");
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(NullPointerException.class, () -> Functions.toStringFunction().apply(null));
   }
 
   @J2ktIncompatible
@@ -101,11 +100,7 @@ public class FunctionsTest extends TestCase {
     assertEquals(3, function.apply("Three").intValue());
     assertNull(function.apply("Null"));
 
-    try {
-      function.apply("Two");
-      fail();
-    } catch (IllegalArgumentException expected) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> function.apply("Two"));
 
     new EqualsTester()
         .addEqualityGroup(function, Functions.forMap(map))
@@ -225,17 +220,9 @@ public class FunctionsTest extends TestCase {
         Functions.compose(integerToSpanish, japaneseToInteger);
 
     assertEquals("Uno", japaneseToSpanish.apply("Ichi"));
-    try {
-      japaneseToSpanish.apply("Ni");
-      fail();
-    } catch (IllegalArgumentException e) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> japaneseToSpanish.apply("Ni"));
     assertEquals("Tres", japaneseToSpanish.apply("San"));
-    try {
-      japaneseToSpanish.apply("Shi");
-      fail();
-    } catch (IllegalArgumentException e) {
-    }
+    assertThrows(IllegalArgumentException.class, () -> japaneseToSpanish.apply("Shi"));
 
     new EqualsTester()
         .addEqualityGroup(japaneseToSpanish, Functions.compose(integerToSpanish, japaneseToInteger))

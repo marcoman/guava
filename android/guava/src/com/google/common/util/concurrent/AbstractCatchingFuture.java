@@ -27,14 +27,13 @@ import com.google.common.util.concurrent.internal.InternalFutureFailureAccess;
 import com.google.common.util.concurrent.internal.InternalFutures;
 import com.google.errorprone.annotations.ForOverride;
 import com.google.errorprone.annotations.concurrent.LazyInit;
+import com.google.j2objc.annotations.RetainedLocalRef;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import javax.annotation.CheckForNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /** Implementations of {@code Futures.catching*}. */
 @GwtCompatible
-@ElementTypesAreNonnullByDefault
 @SuppressWarnings({
   // Whenever both tests are cheap and functional, it's faster to use &, | instead of &&, ||
   "ShortCircuitBoolean",
@@ -67,9 +66,9 @@ abstract class AbstractCatchingFuture<
    * In certain circumstances, this field might theoretically not be visible to an afterDone() call
    * triggered by cancel(). For details, see the comments on the fields of TimeoutFuture.
    */
-  @CheckForNull @LazyInit ListenableFuture<? extends V> inputFuture;
-  @CheckForNull @LazyInit Class<X> exceptionType;
-  @CheckForNull @LazyInit F fallback;
+  @LazyInit @Nullable ListenableFuture<? extends V> inputFuture;
+  @LazyInit @Nullable Class<X> exceptionType;
+  @LazyInit @Nullable F fallback;
 
   AbstractCatchingFuture(
       ListenableFuture<? extends V> inputFuture, Class<X> exceptionType, F fallback) {
@@ -80,9 +79,9 @@ abstract class AbstractCatchingFuture<
 
   @Override
   public final void run() {
-    ListenableFuture<? extends V> localInputFuture = inputFuture;
-    Class<X> localExceptionType = exceptionType;
-    F localFallback = fallback;
+    @RetainedLocalRef ListenableFuture<? extends V> localInputFuture = inputFuture;
+    @RetainedLocalRef Class<X> localExceptionType = exceptionType;
+    @RetainedLocalRef F localFallback = fallback;
     if (localInputFuture == null | localExceptionType == null | localFallback == null
         // This check, unlike all the others, is a volatile read
         || isCancelled()) {
@@ -150,11 +149,10 @@ abstract class AbstractCatchingFuture<
   }
 
   @Override
-  @CheckForNull
-  protected String pendingToString() {
-    ListenableFuture<? extends V> localInputFuture = inputFuture;
-    Class<X> localExceptionType = exceptionType;
-    F localFallback = fallback;
+  protected @Nullable String pendingToString() {
+    @RetainedLocalRef ListenableFuture<? extends V> localInputFuture = inputFuture;
+    @RetainedLocalRef Class<X> localExceptionType = exceptionType;
+    @RetainedLocalRef F localFallback = fallback;
     String superString = super.pendingToString();
     String resultString = "";
     if (localInputFuture != null) {
@@ -184,7 +182,8 @@ abstract class AbstractCatchingFuture<
 
   @Override
   protected final void afterDone() {
-    maybePropagateCancellationTo(inputFuture);
+    @RetainedLocalRef ListenableFuture<? extends V> localInputFuture = inputFuture;
+    maybePropagateCancellationTo(localInputFuture);
     this.inputFuture = null;
     this.exceptionType = null;
     this.fallback = null;

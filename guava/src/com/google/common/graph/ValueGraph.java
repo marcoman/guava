@@ -17,9 +17,10 @@
 package com.google.common.graph;
 
 import com.google.common.annotations.Beta;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
-import javax.annotation.CheckForNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An interface for <a
@@ -107,7 +108,6 @@ import javax.annotation.CheckForNull;
  * @since 20.0
  */
 @Beta
-@ElementTypesAreNonnullByDefault
 public interface ValueGraph<N, V> extends BaseGraph<N> {
   //
   // ValueGraph-level accessors
@@ -176,8 +176,8 @@ public interface ValueGraph<N, V> extends BaseGraph<N> {
    * IllegalStateException} if it is accessed in any way, with the following exceptions:
    *
    * <ul>
-   *   <li>{@code view.equals(view)} evaluates to {@code true} (but any other `equals()` expression
-   *       involving {@code view} will throw)
+   *   <li>{@code view.equals(view)} evaluates to {@code true} (but any other {@code equals()}
+   *       expression involving {@code view} will throw)
    *   <li>{@code hashCode()} does not throw
    *   <li>if {@code node} is re-added to the graph after having been removed, {@code view}'s
    *       behavior is undefined
@@ -194,9 +194,9 @@ public interface ValueGraph<N, V> extends BaseGraph<N> {
    *
    * <p>In an undirected graph, this is equivalent to {@link #adjacentNodes(Object)}.
    *
-   * <p>If {@code node} is removed from the graph after this method is called, the `Set` returned by
-   * this method will be invalidated, and will throw `IllegalStateException` if it is accessed in
-   * any way.
+   * <p>If {@code node} is removed from the graph after this method is called, the {@code Set}
+   * returned by this method will be invalidated, and will throw {@code IllegalStateException} if it
+   * is accessed in any way.
    *
    * @throws IllegalArgumentException if {@code node} is not an element of this graph
    */
@@ -217,8 +217,8 @@ public interface ValueGraph<N, V> extends BaseGraph<N> {
    * IllegalStateException} if it is accessed in any way, with the following exceptions:
    *
    * <ul>
-   *   <li>{@code view.equals(view)} evaluates to {@code true} (but any other `equals()` expression
-   *       involving {@code view} will throw)
+   *   <li>{@code view.equals(view)} evaluates to {@code true} (but any other {@code equals()}
+   *       expression involving {@code view} will throw)
    *   <li>{@code hashCode()} does not throw
    *   <li>if {@code node} is re-added to the graph after having been removed, {@code view}'s
    *       behavior is undefined
@@ -239,8 +239,8 @@ public interface ValueGraph<N, V> extends BaseGraph<N> {
    * IllegalStateException} if it is accessed in any way, with the following exceptions:
    *
    * <ul>
-   *   <li>{@code view.equals(view)} evaluates to {@code true} (but any other `equals()` expression
-   *       involving {@code view} will throw)
+   *   <li>{@code view.equals(view)} evaluates to {@code true} (but any other {@code equals()}
+   *       expression involving {@code view} will throw)
    *   <li>{@code hashCode()} does not throw
    *   <li>if {@code node} is re-added to the graph after having been removed, {@code view}'s
    *       behavior is undefined
@@ -350,8 +350,7 @@ public interface ValueGraph<N, V> extends BaseGraph<N> {
    * @throws IllegalArgumentException if {@code nodeU} or {@code nodeV} is not an element of this
    *     graph
    */
-  @CheckForNull
-  V edgeValueOrDefault(N nodeU, N nodeV, @CheckForNull V defaultValue);
+  @Nullable V edgeValueOrDefault(N nodeU, N nodeV, @Nullable V defaultValue);
 
   /**
    * Returns the value of the edge that connects {@code endpoints} (in the order, if any, specified
@@ -363,8 +362,7 @@ public interface ValueGraph<N, V> extends BaseGraph<N> {
    * @throws IllegalArgumentException if the endpoints are unordered and the graph is directed
    * @since 27.1
    */
-  @CheckForNull
-  V edgeValueOrDefault(EndpointPair<N> endpoints, @CheckForNull V defaultValue);
+  @Nullable V edgeValueOrDefault(EndpointPair<N> endpoints, @Nullable V defaultValue);
 
   //
   // ValueGraph identity
@@ -391,7 +389,7 @@ public interface ValueGraph<N, V> extends BaseGraph<N> {
    * <p>A reference implementation of this is provided by {@link AbstractValueGraph#equals(Object)}.
    */
   @Override
-  boolean equals(@CheckForNull Object object);
+  boolean equals(@Nullable Object object);
 
   /**
    * Returns the hash code for this graph. The hash code of a graph is defined as the hash code of a

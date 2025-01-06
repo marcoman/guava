@@ -16,13 +16,15 @@
 
 package com.google.common.collect;
 
+import static com.google.common.collect.Tables.newCustomTable;
 import static com.google.common.truth.Truth.assertThat;
 
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.base.Supplier;
 import java.util.Map;
 import java.util.TreeMap;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Test cases for {@link Tables#newCustomTable}.
@@ -30,7 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author Jared Levy
  */
 @GwtCompatible
-@ElementTypesAreNonnullByDefault
+@NullMarked
 public class NewCustomTableTest extends AbstractTableTest<Character> {
 
   @Override
@@ -43,7 +45,7 @@ public class NewCustomTableTest extends AbstractTableTest<Character> {
           }
         };
     Map<String, Map<Integer, Character>> backingMap = Maps.newLinkedHashMap();
-    Table<String, Integer, Character> table = Tables.newCustomTable(backingMap, factory);
+    Table<String, Integer, Character> table = newCustomTable(backingMap, factory);
     populate(table, data);
     return table;
   }

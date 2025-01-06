@@ -16,14 +16,18 @@
 
 package com.google.common.base;
 
+import static com.google.common.base.ReflectionFreeAssertThrows.assertThrows;
+
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
 import com.google.common.annotations.J2ktIncompatible;
 import com.google.common.testing.NullPointerTester;
 import junit.framework.TestCase;
+import org.jspecify.annotations.NullUnmarked;
 
 /** Tests for {@link MoreObjects}. */
 @GwtCompatible(emulated = true)
+@NullUnmarked
 public class MoreObjectsTest extends TestCase {
   public void testFirstNonNull_withNonNull() {
     String s1 = "foo";
@@ -40,11 +44,7 @@ public class MoreObjectsTest extends TestCase {
   }
 
   public void testFirstNonNull_throwsNullPointerException() {
-    try {
-      MoreObjects.firstNonNull(null, null);
-      fail();
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(NullPointerException.class, () -> MoreObjects.firstNonNull(null, null));
   }
 
   // ToStringHelper's tests are in ToStringHelperTest

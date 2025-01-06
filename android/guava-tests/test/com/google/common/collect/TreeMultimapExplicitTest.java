@@ -16,19 +16,22 @@
 
 package com.google.common.collect;
 
+import static com.google.common.collect.Maps.immutableEntry;
+import static com.google.common.collect.Sets.newHashSet;
 import static com.google.common.truth.Truth.assertThat;
+import static java.util.Arrays.asList;
 
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
 import com.google.common.testing.SerializableTester;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Map.Entry;
 import java.util.SortedSet;
 import junit.framework.TestCase;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullMarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Unit tests for {@code TreeMultimap} with explicit comparators.
@@ -36,7 +39,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @author Jared Levy
  */
 @GwtCompatible(emulated = true)
-@ElementTypesAreNonnullByDefault
+@NullMarked
 public class TreeMultimapExplicitTest extends TestCase {
 
   /**
@@ -108,8 +111,8 @@ public class TreeMultimapExplicitTest extends TestCase {
     Multimap<String, Integer> multimap = create();
     multimap.put("foo", 3);
     multimap.put("bar", 1);
-    multimap.putAll("foo", Arrays.asList(-1, 2, 4));
-    multimap.putAll("bar", Arrays.asList(2, 3));
+    multimap.putAll("foo", asList(-1, 2, 4));
+    multimap.putAll("bar", asList(2, 3));
     multimap.put("foo", 1);
     assertEquals("{bar=[3, 2, 1], foo=[4, 3, 2, 1, -1]}", multimap.toString());
   }
@@ -154,9 +157,9 @@ public class TreeMultimapExplicitTest extends TestCase {
             Maps.<@Nullable String, Integer>immutableEntry(null, 3),
             Maps.<@Nullable String, Integer>immutableEntry(null, 1),
             Maps.<String, @Nullable Integer>immutableEntry("tree", null),
-            Maps.immutableEntry("tree", 0),
-            Maps.immutableEntry("google", 6),
-            Maps.immutableEntry("google", 2))
+            immutableEntry("tree", 0),
+            immutableEntry("google", 6),
+            immutableEntry("google", 2))
         .inOrder();
   }
 
@@ -175,8 +178,8 @@ public class TreeMultimapExplicitTest extends TestCase {
     Multimap<String, Integer> multimap = create();
     multimap.put("foo", 3);
     multimap.put("bar", 1);
-    multimap.putAll("foo", Arrays.asList(-1, 2, 4));
-    multimap.putAll("bar", Arrays.asList(2, 3));
+    multimap.putAll("foo", asList(-1, 2, 4));
+    multimap.putAll("bar", asList(2, 3));
     multimap.put("foo", 1);
     TreeMultimap<String, Integer> copy =
         TreeMultimap.create(StringLength.COMPARATOR, DECREASING_INT_COMPARATOR);
@@ -194,8 +197,8 @@ public class TreeMultimapExplicitTest extends TestCase {
     assertEquals("google", keySet.last());
     assertEquals(StringLength.COMPARATOR, keySet.comparator());
     assertEquals(Sets.<@Nullable String>newHashSet(null, "tree"), keySet.headSet("yahoo"));
-    assertEquals(Sets.newHashSet("google"), keySet.tailSet("yahoo"));
-    assertEquals(Sets.newHashSet("tree"), keySet.subSet("ask", "yahoo"));
+    assertEquals(newHashSet("google"), keySet.tailSet("yahoo"));
+    assertEquals(newHashSet("tree"), keySet.subSet("ask", "yahoo"));
   }
 
   @GwtIncompatible // SerializableTester

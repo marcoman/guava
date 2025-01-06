@@ -19,6 +19,8 @@ package com.google.common.collect;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.CollectPreconditions.checkNonnegative;
+import static com.google.common.math.IntMath.sqrt;
+import static java.lang.Math.max;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.annotations.GwtCompatible;
@@ -44,8 +46,7 @@ import java.util.SortedSet;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.stream.Collector;
-import javax.annotation.CheckForNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A {@link Set} whose contents will never change, with many other important properties detailed at
@@ -55,7 +56,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 @GwtCompatible(serializable = true, emulated = true)
 @SuppressWarnings("serial") // we're overriding default serialization
-@ElementTypesAreNonnullByDefault
 public abstract class ImmutableSet<E> extends ImmutableCollection<E> implements Set<E> {
   static final int SPLITERATOR_CHARACTERISTICS =
       ImmutableCollection.SPLITERATOR_CHARACTERISTICS | Spliterator.DISTINCT;
@@ -282,7 +282,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E> implements 
   }
 
   @Override
-  public boolean equals(@CheckForNull Object object) {
+  public boolean equals(@Nullable Object object) {
     if (object == this) {
       return true;
     }
@@ -307,7 +307,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E> implements 
 
   @GwtCompatible
   abstract static class CachingAsList<E> extends ImmutableSet<E> {
-    @LazyInit @RetainedWith @CheckForNull private transient ImmutableList<E> asList;
+    @LazyInit @RetainedWith private transient @Nullable ImmutableList<E> asList;
 
     @Override
     public ImmutableList<E> asList() {
@@ -476,7 +476,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E> implements 
      * overrides all the methods that access it here. Thus, all the methods here can safely assume
      * that this field is non-null.
      */
-    @CheckForNull private SetBuilderImpl<E> impl;
+    private @Nullable SetBuilderImpl<E> impl;
     boolean forceCopy;
 
     public Builder() {
@@ -695,7 +695,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E> implements 
    */
   // TODO(cpovirk): Move to Hashing or something, since it's used elsewhere in the Android version.
   static int chooseTableSize(int setSize) {
-    setSize = Math.max(setSize, 2);
+    setSize = max(setSize, 2);
     // Correct the size for open addressing to match desired load factor.
     if (setSize < CUTOFF) {
       // Round up to the next highest power of 2.
@@ -721,7 +721,7 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E> implements 
    */
   private static final class RegularSetBuilderImpl<E> extends SetBuilderImpl<E> {
     // null until at least two elements are present
-    @CheckForNull private @Nullable Object[] hashTable;
+    private @Nullable Object @Nullable [] hashTable;
     private int maxRunBeforeFallback;
     private int expandTableThreshold;
     private int hashCode;
@@ -991,9 +991,9 @@ public abstract class ImmutableSet<E> extends ImmutableCollection<E> implements 
       return inputElementsIncludingAnyDuplicates;
     }
     // Guess the size is "halfway between" all duplicates and no duplicates, on a log scale.
-    return Math.max(
+    return max(
         ImmutableCollection.Builder.DEFAULT_INITIAL_CAPACITY,
-        IntMath.sqrt(inputElementsIncludingAnyDuplicates, RoundingMode.CEILING));
+        sqrt(inputElementsIncludingAnyDuplicates, RoundingMode.CEILING));
   }
 
   private static final long serialVersionUID = 0xcafebabe;

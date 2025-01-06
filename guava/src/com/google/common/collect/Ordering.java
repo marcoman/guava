@@ -18,11 +18,18 @@ package com.google.common.collect;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.CollectPreconditions.checkNonnegative;
+import static java.util.Arrays.asList;
+import static java.util.Arrays.sort;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.sort;
+import static java.util.Collections.unmodifiableList;
 
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.J2ktIncompatible;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
+import com.google.errorprone.annotations.InlineMe;
+import com.google.errorprone.annotations.InlineMeValidationDisabled;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -38,9 +45,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicInteger;
-import javax.annotation.CheckForNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A comparator, with additional methods to support common operations. This is an "enriched" version
@@ -146,7 +152,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  * @since 2.0
  */
 @GwtCompatible
-@ElementTypesAreNonnullByDefault
 public abstract class Ordering<T extends @Nullable Object> implements Comparator<T> {
   // Natural order
 
@@ -196,6 +201,9 @@ public abstract class Ordering<T extends @Nullable Object> implements Comparator
    *
    * @deprecated no need to use this
    */
+  @InlineMe(
+      replacement = "checkNotNull(ordering)",
+      staticImports = "com.google.common.base.Preconditions.checkNotNull")
   @GwtCompatible(serializable = true)
   @Deprecated
   public static <T extends @Nullable Object> Ordering<T> from(Ordering<T> ordering) {
@@ -351,7 +359,7 @@ public abstract class Ordering<T extends @Nullable Object> implements Comparator
     }
 
     @Override
-    public int compare(@CheckForNull Object left, @CheckForNull Object right) {
+    public int compare(@Nullable Object left, @Nullable Object right) {
       if (left == right) {
         return 0;
       } else if (left == null) {
@@ -757,11 +765,11 @@ public abstract class Ordering<T extends @Nullable Object> implements Comparator
 
         @SuppressWarnings("unchecked") // c only contains E's and doesn't escape
         E[] array = (E[]) collection.toArray();
-        Arrays.sort(array, this);
+        sort(array, this);
         if (array.length > k) {
           array = Arrays.copyOf(array, k);
         }
-        return Collections.unmodifiableList(Arrays.asList(array));
+        return unmodifiableList(asList(array));
       }
     }
     return leastOf(iterable.iterator(), k);
@@ -788,16 +796,16 @@ public abstract class Ordering<T extends @Nullable Object> implements Comparator
     checkNonnegative(k, "k");
 
     if (k == 0 || !iterator.hasNext()) {
-      return Collections.emptyList();
+      return emptyList();
     } else if (k >= Integer.MAX_VALUE / 2) {
       // k is really large; just do a straightforward sorted-copy-and-sublist
       ArrayList<E> list = Lists.newArrayList(iterator);
-      Collections.sort(list, this);
+      sort(list, this);
       if (list.size() > k) {
         list.subList(k, list.size()).clear();
       }
       list.trimToSize();
-      return Collections.unmodifiableList(list);
+      return unmodifiableList(list);
     } else {
       TopKSelector<E> selector = TopKSelector.least(k, this);
       selector.offerAll(iterator);
@@ -866,8 +874,8 @@ public abstract class Ordering<T extends @Nullable Object> implements Comparator
   public <E extends T> List<E> sortedCopy(Iterable<E> elements) {
     @SuppressWarnings("unchecked") // does not escape, and contains only E's
     E[] array = (E[]) Iterables.toArray(elements);
-    Arrays.sort(array, this);
-    return Lists.newArrayList(Arrays.asList(array));
+    sort(array, this);
+    return Lists.newArrayList(asList(array));
   }
 
   /**
@@ -946,6 +954,13 @@ public abstract class Ordering<T extends @Nullable Object> implements Comparator
    * @param key the key to be searched for
    * @deprecated Use {@link Collections#binarySearch(List, Object, Comparator)} directly.
    */
+  @InlineMe(
+      replacement = "Collections.binarySearch(sortedList, key, this)",
+      imports = "java.util.Collections")
+  // We can't compatibly make this `final` now.
+  @InlineMeValidationDisabled(
+      "While binarySearch() is not final, the inlining is still safe as long as any overrides"
+          + " follow the contract.")
   @Deprecated
   public int binarySearch(
       List<? extends T> sortedList, @ParametricNullness T key) {

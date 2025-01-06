@@ -19,12 +19,12 @@ import static com.google.common.collect.testing.Helpers.copyToList;
 import static com.google.common.collect.testing.Helpers.mapEntry;
 import static com.google.common.collect.testing.features.CollectionSize.SEVERAL;
 import static com.google.common.collect.testing.features.MapFeature.SUPPORTS_REMOVE;
+import static java.util.Arrays.asList;
 
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.testing.features.CollectionSize;
 import com.google.common.collect.testing.features.MapFeature;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map.Entry;
@@ -36,7 +36,8 @@ import org.junit.Ignore;
  * @author Louis Wasserman
  */
 @GwtCompatible
-@Ignore // Affects only Android test runner, which respects JUnit 4 annotations on JUnit 3 tests.
+@Ignore("test runners must not instantiate and run this directly, only via suites we build")
+// @Ignore affects the Android test runner, which respects JUnit 4 annotations on JUnit 3 tests.
 @SuppressWarnings("JUnit4ClassUsedInJUnit3")
 public class ListMultimapRemoveTester<K, V> extends AbstractListMultimapTester<K, V> {
   @MapFeature.Require(SUPPORTS_REMOVE)
@@ -52,7 +53,7 @@ public class ListMultimapRemoveTester<K, V> extends AbstractListMultimapTester<K
   @MapFeature.Require(SUPPORTS_REMOVE)
   @CollectionSize.Require(SEVERAL)
   public void testRemoveAtIndexFromGetPropagates() {
-    List<V> values = Arrays.asList(v0(), v1(), v0());
+    List<V> values = asList(v0(), v1(), v0());
 
     for (int i = 0; i < 3; i++) {
       resetContainer(mapEntry(k0(), v0()), mapEntry(k0(), v1()), mapEntry(k0(), v0()));
@@ -68,7 +69,7 @@ public class ListMultimapRemoveTester<K, V> extends AbstractListMultimapTester<K
   @MapFeature.Require(SUPPORTS_REMOVE)
   @CollectionSize.Require(SEVERAL)
   public void testRemoveAtIndexFromAsMapPropagates() {
-    List<V> values = Arrays.asList(v0(), v1(), v0());
+    List<V> values = asList(v0(), v1(), v0());
 
     for (int i = 0; i < 3; i++) {
       resetContainer(mapEntry(k0(), v0()), mapEntry(k0(), v1()), mapEntry(k0(), v0()));
@@ -85,7 +86,7 @@ public class ListMultimapRemoveTester<K, V> extends AbstractListMultimapTester<K
   @MapFeature.Require(SUPPORTS_REMOVE)
   @CollectionSize.Require(SEVERAL)
   public void testRemoveAtIndexFromAsMapEntrySetPropagates() {
-    List<V> values = Arrays.asList(v0(), v1(), v0());
+    List<V> values = asList(v0(), v1(), v0());
 
     for (int i = 0; i < 3; i++) {
       resetContainer(mapEntry(k0(), v0()), mapEntry(k0(), v1()), mapEntry(k0(), v0()));

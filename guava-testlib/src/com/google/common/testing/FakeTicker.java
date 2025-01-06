@@ -17,6 +17,7 @@
 package com.google.common.testing;
 
 import static com.google.common.base.Preconditions.checkArgument;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
@@ -26,6 +27,7 @@ import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * A Ticker whose value can be advanced programmatically in test.
@@ -38,7 +40,7 @@ import java.util.concurrent.atomic.AtomicLong;
  * @author Jige Yu
  * @since 10.0
  */
-@ElementTypesAreNonnullByDefault
+@NullMarked
 @GwtCompatible
 public class FakeTicker extends Ticker {
 
@@ -100,7 +102,7 @@ public class FakeTicker extends Ticker {
   @CanIgnoreReturnValue
   @SuppressWarnings("Java7ApiChecker") // guava-android can rely on library desugaring now.
   public FakeTicker setAutoIncrementStep(Duration autoIncrementStep) {
-    return setAutoIncrementStep(autoIncrementStep.toNanos(), TimeUnit.NANOSECONDS);
+    return setAutoIncrementStep(autoIncrementStep.toNanos(), NANOSECONDS);
   }
 
   @Override

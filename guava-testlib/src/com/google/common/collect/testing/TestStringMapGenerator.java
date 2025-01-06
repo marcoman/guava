@@ -16,10 +16,13 @@
 
 package com.google.common.collect.testing;
 
+import static com.google.common.collect.testing.Helpers.mapEntry;
+
 import com.google.common.annotations.GwtCompatible;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import org.jspecify.annotations.NullMarked;
 
 /**
  * Implementation helper for {@link TestMapGenerator} for use with maps of strings.
@@ -29,17 +32,17 @@ import java.util.Map.Entry;
  * @author George van den Driessche
  */
 @GwtCompatible
-@ElementTypesAreNonnullByDefault
+@NullMarked
 public abstract class TestStringMapGenerator implements TestMapGenerator<String, String> {
 
   @Override
   public SampleElements<Entry<String, String>> samples() {
     return new SampleElements<>(
-        Helpers.mapEntry("one", "January"),
-        Helpers.mapEntry("two", "February"),
-        Helpers.mapEntry("three", "March"),
-        Helpers.mapEntry("four", "April"),
-        Helpers.mapEntry("five", "May"));
+        mapEntry("one", "January"),
+        mapEntry("two", "February"),
+        mapEntry("three", "March"),
+        mapEntry("four", "April"),
+        mapEntry("five", "May"));
   }
 
   @Override

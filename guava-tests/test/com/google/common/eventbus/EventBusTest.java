@@ -26,12 +26,14 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 import junit.framework.TestCase;
+import org.jspecify.annotations.NullUnmarked;
 
 /**
  * Test case for {@link EventBus}.
  *
  * @author Cliff Biffle
  */
+@NullUnmarked
 public class EventBusTest extends TestCase {
   private static final String EVENT = "Hello";
   private static final String BUS_IDENTIFIER = "test-bus";
@@ -159,11 +161,7 @@ public class EventBusTest extends TestCase {
           }
         };
     eventBus.register(subscriber);
-    try {
-      eventBus.post(EVENT);
-    } catch (RuntimeException e) {
-      fail("Exception should not be thrown.");
-    }
+    eventBus.post(EVENT);
   }
 
   public void testDeadEventForwarding() {

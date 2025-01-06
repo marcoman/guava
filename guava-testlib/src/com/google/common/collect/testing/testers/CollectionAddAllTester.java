@@ -16,18 +16,19 @@
 
 package com.google.common.collect.testing.testers;
 
+import static com.google.common.collect.testing.Helpers.getMethod;
 import static com.google.common.collect.testing.features.CollectionFeature.ALLOWS_NULL_VALUES;
 import static com.google.common.collect.testing.features.CollectionFeature.FAILS_FAST_ON_CONCURRENT_MODIFICATION;
 import static com.google.common.collect.testing.features.CollectionFeature.RESTRICTS_ELEMENTS;
 import static com.google.common.collect.testing.features.CollectionFeature.SUPPORTS_ADD;
 import static com.google.common.collect.testing.features.CollectionSize.ZERO;
+import static com.google.common.collect.testing.testers.ReflectionFreeAssertThrows.assertThrows;
 import static java.util.Collections.singletonList;
 
 import com.google.common.annotations.GwtCompatible;
 import com.google.common.annotations.GwtIncompatible;
 import com.google.common.annotations.J2ktIncompatible;
 import com.google.common.collect.testing.AbstractCollectionTester;
-import com.google.common.collect.testing.Helpers;
 import com.google.common.collect.testing.MinimalCollection;
 import com.google.common.collect.testing.features.CollectionFeature;
 import com.google.common.collect.testing.features.CollectionSize;
@@ -35,7 +36,7 @@ import java.lang.reflect.Method;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.List;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.junit.Ignore;
 
 /**
@@ -46,7 +47,8 @@ import org.junit.Ignore;
  * @author Kevin Bourrillion
  */
 @GwtCompatible(emulated = true)
-@Ignore // Affects only Android test runner, which respects JUnit 4 annotations on JUnit 3 tests.
+@Ignore("test runners must not instantiate and run this directly, only via suites we build")
+// @Ignore affects the Android test runner, which respects JUnit 4 annotations on JUnit 3 tests.
 @SuppressWarnings("JUnit4ClassUsedInJUnit3")
 public class CollectionAddAllTester<E extends @Nullable Object>
     extends AbstractCollectionTester<E> {
@@ -75,11 +77,8 @@ public class CollectionAddAllTester<E extends @Nullable Object>
 
   @CollectionFeature.Require(absent = SUPPORTS_ADD)
   public void testAddAll_unsupportedNonePresent() {
-    try {
-      collection.addAll(createDisjointCollection());
-      fail("addAll(nonePresent) should throw");
-    } catch (UnsupportedOperationException expected) {
-    }
+    assertThrows(
+        UnsupportedOperationException.class, () -> collection.addAll(createDisjointCollection()));
     expectUnchanged();
     expectMissing(e3(), e4());
   }
@@ -97,25 +96,22 @@ public class CollectionAddAllTester<E extends @Nullable Object>
   @CollectionFeature.Require(absent = SUPPORTS_ADD)
   @CollectionSize.Require(absent = ZERO)
   public void testAddAll_unsupportedSomePresent() {
-    try {
-      collection.addAll(MinimalCollection.of(e3(), e0()));
-      fail("addAll(somePresent) should throw");
-    } catch (UnsupportedOperationException expected) {
-    }
+    assertThrows(
+        UnsupportedOperationException.class,
+        () -> collection.addAll(MinimalCollection.of(e3(), e0())));
     expectUnchanged();
   }
 
   @CollectionFeature.Require({SUPPORTS_ADD, FAILS_FAST_ON_CONCURRENT_MODIFICATION})
   @CollectionSize.Require(absent = ZERO)
   public void testAddAllConcurrentWithIteration() {
-    try {
-      Iterator<E> iterator = collection.iterator();
-      assertTrue(collection.addAll(MinimalCollection.of(e3(), e0())));
-      iterator.next();
-      fail("Expected ConcurrentModificationException");
-    } catch (ConcurrentModificationException expected) {
-      // success
-    }
+    assertThrows(
+        ConcurrentModificationException.class,
+        () -> {
+          Iterator<E> iterator = collection.iterator();
+          assertTrue(collection.addAll(MinimalCollection.of(e3(), e0())));
+          iterator.next();
+        });
   }
 
   @CollectionFeature.Require(absent = SUPPORTS_ADD)
@@ -146,11 +142,7 @@ public class CollectionAddAllTester<E extends @Nullable Object>
   @CollectionFeature.Require(value = SUPPORTS_ADD, absent = ALLOWS_NULL_VALUES)
   public void testAddAll_nullUnsupported() {
     List<E> containsNull = singletonList(null);
-    try {
-      collection.addAll(containsNull);
-      fail("addAll(containsNull) should throw");
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(NullPointerException.class, () -> collection.addAll(containsNull));
     expectUnchanged();
     expectNullMissingWhenNullUnsupported(
         "Should not contain null after unsupported addAll(containsNull)");
@@ -158,22 +150,18 @@ public class CollectionAddAllTester<E extends @Nullable Object>
 
   @CollectionFeature.Require(SUPPORTS_ADD)
   public void testAddAll_nullCollectionReference() {
-    try {
-      collection.addAll(null);
-      fail("addAll(null) should throw NullPointerException");
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(NullPointerException.class, () -> collection.addAll(null));
   }
 
   /**
    * Returns the {@link Method} instance for {@link #testAddAll_nullUnsupported()} so that tests can
    * suppress it with {@code FeatureSpecificTestSuiteBuilder.suppressing()} until <a
-   * href="http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=5045147">Sun bug 5045147</a> is fixed.
+   * href="https://bugs.openjdk.org/browse/JDK-5045147">JDK-5045147</a> is fixed.
    */
   @J2ktIncompatible
   @GwtIncompatible // reflection
   public static Method getAddAllNullUnsupportedMethod() {
-    return Helpers.getMethod(CollectionAddAllTester.class, "testAddAll_nullUnsupported");
+    return getMethod(CollectionAddAllTester.class, "testAddAll_nullUnsupported");
   }
 
   /**
@@ -186,7 +174,7 @@ public class CollectionAddAllTester<E extends @Nullable Object>
   @J2ktIncompatible
   @GwtIncompatible // reflection
   public static Method getAddAllUnsupportedNonePresentMethod() {
-    return Helpers.getMethod(CollectionAddAllTester.class, "testAddAll_unsupportedNonePresent");
+    return getMethod(CollectionAddAllTester.class, "testAddAll_unsupportedNonePresent");
   }
 
   /**
@@ -199,6 +187,6 @@ public class CollectionAddAllTester<E extends @Nullable Object>
   @J2ktIncompatible
   @GwtIncompatible // reflection
   public static Method getAddAllUnsupportedSomePresentMethod() {
-    return Helpers.getMethod(CollectionAddAllTester.class, "testAddAll_unsupportedSomePresent");
+    return getMethod(CollectionAddAllTester.class, "testAddAll_unsupportedSomePresent");
   }
 }

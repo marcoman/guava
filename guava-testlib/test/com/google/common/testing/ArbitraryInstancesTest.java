@@ -18,6 +18,7 @@ package com.google.common.testing;
 
 import static com.google.common.truth.Truth.assertThat;
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.Assert.assertThrows;
 
 import com.google.common.base.CharMatcher;
@@ -132,13 +133,15 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.MatchResult;
 import java.util.regex.Pattern;
 import junit.framework.TestCase;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Unit test for {@link ArbitraryInstances}.
  *
  * @author Ben Yu
  */
+@NullUnmarked
 public class ArbitraryInstancesTest extends TestCase {
 
   public void testGet_primitives() {
@@ -166,7 +169,7 @@ public class ArbitraryInstancesTest extends TestCase {
     assertEquals(0, ArbitraryInstances.get(BigInteger.class).intValue());
     assertEquals("", ArbitraryInstances.get(String.class));
     assertEquals("", ArbitraryInstances.get(CharSequence.class));
-    assertEquals(TimeUnit.SECONDS, ArbitraryInstances.get(TimeUnit.class));
+    assertEquals(SECONDS, ArbitraryInstances.get(TimeUnit.class));
     assertNotNull(ArbitraryInstances.get(Object.class));
     assertEquals(0, ArbitraryInstances.get(Number.class));
     assertEquals(UTF_8, ArbitraryInstances.get(Charset.class));

@@ -23,15 +23,14 @@ import com.google.common.annotations.GwtCompatible;
 import com.google.common.base.Function;
 import com.google.errorprone.annotations.ForOverride;
 import com.google.errorprone.annotations.concurrent.LazyInit;
+import com.google.j2objc.annotations.RetainedLocalRef;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
-import javax.annotation.CheckForNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /** Implementations of {@code Futures.transform*}. */
 @GwtCompatible
-@ElementTypesAreNonnullByDefault
 @SuppressWarnings({
   // Whenever both tests are cheap and functional, it's faster to use &, | instead of &&, ||
   "ShortCircuitBoolean",
@@ -62,8 +61,8 @@ abstract class AbstractTransformFuture<
    * In certain circumstances, this field might theoretically not be visible to an afterDone() call
    * triggered by cancel(). For details, see the comments on the fields of TimeoutFuture.
    */
-  @CheckForNull @LazyInit ListenableFuture<? extends I> inputFuture;
-  @CheckForNull @LazyInit F function;
+  @LazyInit @Nullable ListenableFuture<? extends I> inputFuture;
+  @LazyInit @Nullable F function;
 
   AbstractTransformFuture(ListenableFuture<? extends I> inputFuture, F function) {
     this.inputFuture = checkNotNull(inputFuture);
@@ -73,8 +72,8 @@ abstract class AbstractTransformFuture<
   @Override
   @SuppressWarnings("CatchingUnchecked") // sneaky checked exception
   public final void run() {
-    ListenableFuture<? extends I> localInputFuture = inputFuture;
-    F localFunction = function;
+    @RetainedLocalRef ListenableFuture<? extends I> localInputFuture = inputFuture;
+    @RetainedLocalRef F localFunction = function;
     if (isCancelled() | localInputFuture == null | localFunction == null) {
       return;
     }
@@ -186,16 +185,16 @@ abstract class AbstractTransformFuture<
 
   @Override
   protected final void afterDone() {
-    maybePropagateCancellationTo(inputFuture);
+    @RetainedLocalRef ListenableFuture<? extends I> localInputFuture = inputFuture;
+    maybePropagateCancellationTo(localInputFuture);
     this.inputFuture = null;
     this.function = null;
   }
 
   @Override
-  @CheckForNull
-  protected String pendingToString() {
-    ListenableFuture<? extends I> localInputFuture = inputFuture;
-    F localFunction = function;
+  protected @Nullable String pendingToString() {
+    @RetainedLocalRef ListenableFuture<? extends I> localInputFuture = inputFuture;
+    @RetainedLocalRef F localFunction = function;
     String superString = super.pendingToString();
     String resultString = "";
     if (localInputFuture != null) {

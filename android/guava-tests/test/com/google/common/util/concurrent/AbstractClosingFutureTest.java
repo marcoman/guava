@@ -20,6 +20,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.asList;
 import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
+import static com.google.common.util.concurrent.ClosingFuture.withoutCloser;
 import static com.google.common.util.concurrent.Futures.immediateCancelledFuture;
 import static com.google.common.util.concurrent.Futures.immediateFailedFuture;
 import static com.google.common.util.concurrent.Futures.immediateFuture;
@@ -74,6 +75,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.TestCase;
+import org.jspecify.annotations.NullUnmarked;
 import org.mockito.Mockito;
 
 /**
@@ -82,6 +84,7 @@ import org.mockito.Mockito;
  * ClosingFuture#finishToValueAndCloser(ValueAndCloserConsumer, Executor)} paths to complete a
  * {@link ClosingFuture} pipeline.
  */
+@NullUnmarked
 public abstract class AbstractClosingFutureTest extends TestCase {
   // TODO(dpb): Use Expect once that supports JUnit 3, or we can use JUnit 4.
   final List<AssertionError> failures = new ArrayList<>();
@@ -693,7 +696,7 @@ public abstract class AbstractClosingFutureTest extends TestCase {
                 },
                 executor)
             .transformAsync(
-                ClosingFuture.withoutCloser(
+                withoutCloser(
                     new AsyncFunction<TestCloseable, String>() {
                       @Override
                       public ListenableFuture<String> apply(TestCloseable v) throws Exception {
@@ -1490,7 +1493,7 @@ public abstract class AbstractClosingFutureTest extends TestCase {
     ClosingFuture<String> unused =
         closingFuture.catchingAsync(
             Exception.class,
-            ClosingFuture.withoutCloser(
+            withoutCloser(
                 new AsyncFunction<Exception, String>() {
                   @Override
                   public ListenableFuture<String> apply(Exception x) throws Exception {

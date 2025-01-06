@@ -33,13 +33,15 @@ import java.util.NavigableMap;
 import java.util.NavigableSet;
 import java.util.SortedMap;
 import junit.framework.TestSuite;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Tests for {@link Maps#synchronizedNavigableMap(NavigableMap)}.
  *
  * @author Louis Wasserman
  */
+@NullUnmarked
 public class SynchronizedNavigableMapTest extends SynchronizedMapTest {
   @Override
   protected <K, V> NavigableMap<K, V> create() {
@@ -261,7 +263,7 @@ public class SynchronizedNavigableMapTest extends SynchronizedMapTest {
     suite.addTest(
         NavigableMapTestSuiteBuilder.using(
                 new TestStringSortedMapGenerator() {
-                  private final Object mutex = new Integer(1);
+                  private final Object mutex = new Object[0]; // something Serializable
 
                   @Override
                   protected SortedMap<String, String> create(Entry<String, String>[] entries) {

@@ -26,7 +26,8 @@ import java.util.WeakHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicBoolean;
 import junit.framework.TestCase;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Tests for {@link GcFinalization}.
@@ -36,6 +37,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 @AndroidIncompatible // depends on details of gc
 
+@NullUnmarked
 public class GcFinalizationTest extends TestCase {
 
   // ----------------------------------------------------------------
@@ -120,6 +122,7 @@ public class GcFinalizationTest extends TestCase {
       this(interruptee, new AtomicBoolean(false));
     }
 
+    @SuppressWarnings("ThreadPriorityCheck") // TODO: b/175898629 - Consider onSpinWait.
     Interruptenator(final Thread interruptee, final AtomicBoolean shutdown) {
       super(
           new Runnable() {
@@ -135,6 +138,7 @@ public class GcFinalizationTest extends TestCase {
       start();
     }
 
+    @SuppressWarnings("ThreadPriorityCheck") // TODO: b/175898629 - Consider onSpinWait.
     void shutdown() {
       shutdown.set(true);
       while (this.isAlive()) {

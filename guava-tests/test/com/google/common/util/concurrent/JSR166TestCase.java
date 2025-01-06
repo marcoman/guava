@@ -48,6 +48,7 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import junit.framework.AssertionFailedError;
 import junit.framework.TestCase;
+import org.jspecify.annotations.NullUnmarked;
 
 /**
  * Base class for JSR166 Junit TCK tests. Defines some constants, utility methods and classes, as
@@ -99,9 +100,15 @@ import junit.framework.TestCase;
  *       tests.
  * </ul>
  */
+@SuppressWarnings({
+  // We call threadUnexpectedException, which does the right thing for errors.
+  "AssertionFailureIgnored",
+  // We're following the upstream naming to reduce diffs.
+  "IdentifierName",
+  "ConstantCaseForConstants",
+})
+@NullUnmarked
 abstract class JSR166TestCase extends TestCase {
-  private static final boolean useSecurityManager = Boolean.getBoolean("jsr166.useSecurityManager");
-
   protected static final boolean expensiveTests = Boolean.getBoolean("jsr166.expensiveTests");
 
   /**
@@ -435,6 +442,7 @@ abstract class JSR166TestCase extends TestCase {
    * Delays, via Thread.sleep, for the given millisecond delay, but if the sleep is shorter than
    * specified, may re-sleep or yield until time elapses.
    */
+  @SuppressWarnings("ThreadPriorityCheck") // TODO: b/175898629 - Consider onSpinWait?
   static void delay(long millis) throws InterruptedException {
     long startTime = System.nanoTime();
     long ns = millis * 1000 * 1000;
@@ -449,7 +457,7 @@ abstract class JSR166TestCase extends TestCase {
   }
 
   /** Waits out termination of a thread pool or fails doing so. */
-  void joinPool(ExecutorService exec) {
+  void joinPool(ExecutorService exec) throws InterruptedException {
     try {
       exec.shutdown();
       assertTrue(
@@ -457,8 +465,6 @@ abstract class JSR166TestCase extends TestCase {
           exec.awaitTermination(2 * LONG_DELAY_MS, MILLISECONDS));
     } catch (SecurityException ok) {
       // Allowed in case test doesn't have privs
-    } catch (InterruptedException ie) {
-      fail("Unexpected InterruptedException");
     }
   }
 
@@ -466,37 +472,31 @@ abstract class JSR166TestCase extends TestCase {
    * Checks that thread does not terminate within the default millisecond delay of {@code
    * timeoutMillis()}.
    */
-  void assertThreadStaysAlive(Thread thread) {
+  void assertThreadStaysAlive(Thread thread) throws InterruptedException {
     assertThreadStaysAlive(thread, timeoutMillis());
   }
 
   /** Checks that thread does not terminate within the given millisecond delay. */
-  void assertThreadStaysAlive(Thread thread, long millis) {
-    try {
-      // No need to optimize the failing case via Thread.join.
-      delay(millis);
-      assertTrue(thread.isAlive());
-    } catch (InterruptedException ie) {
-      fail("Unexpected InterruptedException");
-    }
+  void assertThreadStaysAlive(Thread thread, long millis) throws InterruptedException {
+    // No need to optimize the failing case via Thread.join.
+    delay(millis);
+    assertTrue(thread.isAlive());
   }
 
   /**
    * Checks that the threads do not terminate within the default millisecond delay of {@code
    * timeoutMillis()}.
    */
-  void assertThreadsStayAlive(Thread... threads) {
+  void assertThreadsStayAlive(Thread... threads) throws InterruptedException {
     assertThreadsStayAlive(timeoutMillis(), threads);
   }
 
   /** Checks that the threads do not terminate within the given millisecond delay. */
-  void assertThreadsStayAlive(long millis, Thread... threads) {
-    try {
-      // No need to optimize the failing case via Thread.join.
-      delay(millis);
-      for (Thread thread : threads) assertTrue(thread.isAlive());
-    } catch (InterruptedException ie) {
-      fail("Unexpected InterruptedException");
+  void assertThreadsStayAlive(long millis, Thread... threads) throws InterruptedException {
+    // No need to optimize the failing case via Thread.join.
+    delay(millis);
+    for (Thread thread : threads) {
+      assertTrue(thread.isAlive());
     }
   }
 
@@ -658,6 +658,7 @@ abstract class JSR166TestCase extends TestCase {
    * Spin-waits up to the specified number of milliseconds for the given thread to enter a wait
    * state: BLOCKED, WAITING, or TIMED_WAITING.
    */
+  @SuppressWarnings("ThreadPriorityCheck") // TODO: b/175898629 - Consider onSpinWait.
   void waitForThreadToEnterWaitState(Thread thread, long timeoutMillis) {
     long startTime = System.nanoTime();
     for (; ; ) {

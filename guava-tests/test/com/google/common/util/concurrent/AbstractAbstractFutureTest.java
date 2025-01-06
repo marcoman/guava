@@ -20,6 +20,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.util.concurrent.Futures.getDone;
 import static com.google.common.util.concurrent.Futures.immediateFuture;
 import static com.google.common.util.concurrent.MoreExecutors.directExecutor;
+import static com.google.common.util.concurrent.ReflectionFreeAssertThrows.assertThrows;
 import static com.google.common.util.concurrent.Runnables.doNothing;
 import static com.google.common.util.concurrent.TestPlatform.getDoneFromTimeoutOverload;
 import static com.google.common.util.concurrent.TestPlatform.verifyGetOnPendingFuture;
@@ -35,13 +36,15 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeoutException;
 import junit.framework.TestCase;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NullUnmarked;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Base class for tests for emulated {@link AbstractFuture} that allow subclasses to swap in a
  * different "source Future" for {@link AbstractFuture#setFuture} calls.
  */
 @GwtCompatible(emulated = true)
+@NullUnmarked
 abstract class AbstractAbstractFutureTest extends TestCase {
   private TestedFuture<Integer> future;
   private AbstractFuture<Integer> delegate;
@@ -331,28 +334,16 @@ abstract class AbstractAbstractFutureTest extends TestCase {
   }
 
   public void testNullListener() {
-    try {
-      future.addListener(null, directExecutor());
-      fail();
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(NullPointerException.class, () -> future.addListener(null, directExecutor()));
   }
 
   public void testNullExecutor() {
-    try {
-      future.addListener(doNothing(), null);
-      fail();
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(NullPointerException.class, () -> future.addListener(doNothing(), null));
   }
 
   public void testNullTimeUnit() throws Exception {
     future.set(1);
-    try {
-      future.get(0, null);
-      fail();
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(NullPointerException.class, () -> future.get(0, null));
   }
 
   public void testNegativeTimeout() throws Exception {
@@ -383,11 +374,7 @@ abstract class AbstractAbstractFutureTest extends TestCase {
   }
 
   public void testSetExceptionNull() throws Exception {
-    try {
-      future.setException(null);
-      fail();
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(NullPointerException.class, () -> future.setException(null));
 
     assertThat(future.isDone()).isFalse();
     assertThat(future.set(1)).isTrue();
@@ -395,11 +382,7 @@ abstract class AbstractAbstractFutureTest extends TestCase {
   }
 
   public void testSetFutureNull() throws Exception {
-    try {
-      future.setFuture(null);
-      fail();
-    } catch (NullPointerException expected) {
-    }
+    assertThrows(NullPointerException.class, () -> future.setFuture(null));
 
     assertThat(future.isDone()).isFalse();
     assertThat(future.set(1)).isTrue();
@@ -466,7 +449,7 @@ abstract class AbstractAbstractFutureTest extends TestCase {
       getDone(future);
       fail();
     } catch (ExecutionException e) {
-      assertThat(e.getCause()).isSameInstanceAs(expectedException);
+      assertThat(e).hasCauseThat().isSameInstanceAs(expectedException);
     }
 
     try {
