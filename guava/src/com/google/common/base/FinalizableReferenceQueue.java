@@ -17,6 +17,8 @@ package com.google.common.base;
 import com.google.common.annotations.GwtIncompatible;
 import com.google.common.annotations.J2ktIncompatible;
 import com.google.common.annotations.VisibleForTesting;
+import io.github.pixee.security.HostValidator;
+import io.github.pixee.security.Urls;
 import java.io.Closeable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -360,7 +362,7 @@ public class FinalizableReferenceQueue implements Closeable {
         throw new IOException("Unsupported path style: " + urlString);
       }
       urlString = urlString.substring(0, urlString.length() - finalizerPath.length());
-      return new URL(finalizerUrl, urlString);
+      return Urls.create(finalizerUrl, urlString, Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
     }
 
     /** Creates a class loader with the given base URL as its classpath. */

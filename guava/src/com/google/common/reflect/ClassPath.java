@@ -18,6 +18,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.StandardSystemProperty.JAVA_CLASS_PATH;
 import static com.google.common.base.StandardSystemProperty.PATH_SEPARATOR;
+import io.github.pixee.security.HostValidator;
+import io.github.pixee.security.Urls;
 import static java.util.logging.Level.WARNING;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -642,7 +644,7 @@ public final class ClassPath {
         try {
           urls.add(new File(entry).toURI().toURL());
         } catch (SecurityException e) { // File.toURI checks to see if the file is a directory
-          urls.add(new URL("file", null, new File(entry).getAbsolutePath()));
+          urls.add(Urls.create("file", null, new File(entry).getAbsolutePath(), Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS));
         }
       } catch (MalformedURLException e) {
         logger.log(WARNING, "malformed classpath entry: " + entry, e);
@@ -659,7 +661,7 @@ public final class ClassPath {
    */
   @VisibleForTesting
   static URL getClassPathEntry(File jarFile, String path) throws MalformedURLException {
-    return new URL(jarFile.toURI().toURL(), path);
+    return Urls.create(jarFile.toURI().toURL(), path, Urls.HTTP_PROTOCOLS, HostValidator.DENY_COMMON_INFRASTRUCTURE_TARGETS);
   }
 
   @VisibleForTesting
